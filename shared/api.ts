@@ -5,9 +5,9 @@
  */
 
 /**
- * Response type for /api/demo
+ * Response type for /api/hello
  */
-export interface DemoResponse {
+export interface HelloResponse {
   message: string;
 }
 

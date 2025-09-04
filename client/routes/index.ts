@@ -9,7 +9,6 @@ export {
   createRoutes, 
   getRouteComponent, 
   Index, 
-  NotFound, 
-  LoadingFallback, 
+  NotFound,
   LazyWrapper 
 } from "./components";
