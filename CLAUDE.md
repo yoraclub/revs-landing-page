@@ -35,7 +35,6 @@ REVZ Landing Page Architecture
 - `vite.config.ts` - Primary build configuration (client + dev server)
 - `vite.config.server.ts` - Server-specific build configuration
 - `tailwind.config.ts` - CSS framework configuration with custom theme
-- `.env` - Environment variables (modified from default)
 - `.gitignore` - Version control exclusions
 
 ### Module Structure
@@ -105,9 +104,9 @@ REVZ Landing Page Architecture
 - **Includes**: `client/`, `server/`, `shared/`, config files
 
 ### Environment Variables
-- **Location**: `.env` file in root
-- **Access**: Server-side only via dotenv
-- **Security**: Excluded from client bundle and git (if sensitive)
+- **Location**: Set via system environment or deployment platform
+- **Access**: Server-side only via process.env
+- **Security**: Never committed to version control
 
 ## Development Workflow
 
@@ -227,6 +226,6 @@ dist/server/
 4. Custom colors available: `revz-red` (#FF1801), `revz-dark` (#0A0A0A)
 
 ### Environment Changes
-1. Add variables to `.env` file
+1. Set variables via system environment or deployment platform
 2. Access via `process.env.VARIABLE_NAME` in server code
 3. Client cannot access environment variables directly

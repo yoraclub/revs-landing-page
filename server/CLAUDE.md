@@ -175,26 +175,25 @@ Vite Server Build Configuration:
 ### Environment Variables
 
 **Current Usage**:
-- `PING_MESSAGE`: Custom message for health check endpoint
+- `PING_MESSAGE`: Custom message for health check endpoint (defaults to "ping pong")
 - `PORT`: Server port (default: 3000 in production)
 - `NODE_ENV`: Runtime environment (set to "production" in build)
 
 **Access Pattern**:
 ```typescript
 // Server-side only access
-const customMessage = process.env.PING_MESSAGE ?? "ping";
+const customMessage = process.env.PING_MESSAGE ?? "ping pong";
 const port = process.env.PORT || 3000;
 ```
 
 ### Configuration Loading
 
-**dotenv Integration**:
+**Environment Access**:
 ```typescript
 // server/index.ts
-import "dotenv/config";  // Loads .env file automatically
+// Environment variables accessed directly via process.env
+// No .env file - variables set via system or deployment platform
 ```
-
-**Environment File Location**: Root `.env` file
 
 ## API Development Patterns
 
@@ -383,7 +382,7 @@ export const handler: RequestHandler = async (req, res) => {
 4. Test via `/api/[endpoint]` in development
 
 #### Environment Configuration
-1. Add variables to root `.env` file
+1. Set variables via system environment or deployment platform
 2. Access via `process.env.VARIABLE_NAME`
 3. Provide defaults for production safety
 4. Document usage in this file
