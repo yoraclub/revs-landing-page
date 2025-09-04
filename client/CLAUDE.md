@@ -9,10 +9,20 @@ The client module is a modern React Single Page Application (SPA) built with Typ
 ```
 client/
 ├── App.tsx                 # Root component and app setup
+├── main.tsx               # Application entry point
 ├── global.css             # Global styles and CSS variables
 ├── pages/                 # Top-level route components
 │   ├── Index.tsx          # Main landing page
 │   └── NotFound.tsx       # 404 error page
+├── routes/                # Routing system
+│   ├── index.ts           # Route module exports
+│   ├── paths.ts           # Route path definitions
+│   └── components.tsx     # Route component mappings
+├── layout/                # Layout components
+│   ├── index.ts           # Layout module exports
+│   ├── Layout.tsx         # Main layout wrapper
+│   ├── BottomNavigation.tsx # Bottom navigation component
+│   └── LoadingFallback.tsx # Loading state component
 └── components/            # Reusable UI components
     └── ui/                # Radix UI-based component library
         ├── accordion.tsx
@@ -23,6 +33,10 @@ client/
 ```
 
 ## Application Architecture
+
+### Application Entry Point (`main.tsx`)
+
+The application starts with `main.tsx` which imports and initializes the main `App.tsx` component.
 
 ### Root Component Structure (`App.tsx`)
 
@@ -35,8 +49,7 @@ App Component Hierarchy:
 │           ├── Sonner (toast notifications)
 │           └── BrowserRouter (React Router)
 │               └── Routes
-│                   ├── Route: "/" → Index
-│                   └── Route: "*" → NotFound
+│                   └── {createRoutes()} → Dynamically generated routes
 ```
 
 ### Provider Stack Details
@@ -58,7 +71,95 @@ App Component Hierarchy:
 
 4. **BrowserRouter** (React Router DOM)
    - **Routing Strategy**: Client-side routing with history API
-   - **Fallback**: Catch-all route for 404 handling
+   - **Route Generation**: Dynamic route creation via `createRoutes()` from `@/routes`
+
+## Routing Architecture
+
+### Routing System (`client/routes/`)
+
+The application uses a centralized routing system with clear separation of concerns:
+
+```typescript
+Routes Module Structure:
+├── paths.ts               # Route path constants and configuration
+│   ├── ROUTE_PATHS        # Centralized path definitions
+│   └── ROUTE_CONFIG       # Route metadata (titles, descriptions)
+├── components.tsx         # Route-to-component mappings
+│   ├── routeComponents    # Route configuration array
+│   ├── createRoutes()     # Route generation function
+│   └── LazyWrapper        # Lazy loading wrapper with LoadingFallback
+└── index.ts              # Clean exports for the entire routing system
+```
+
+**Key Features**:
+- **Centralized Paths**: All route paths defined in `ROUTE_PATHS` constant
+- **Type Safety**: TypeScript types ensure path consistency
+- **Layout Integration**: All routes automatically wrapped with `Layout` component
+- **Lazy Loading**: Built-in support for code splitting with `LazyWrapper`
+- **Loading States**: Integrated `LoadingFallback` component
+
+### Route Definition Pattern
+
+```typescript
+// Add new route in paths.ts
+ABOUT: "/about",
+
+// Add component mapping in components.tsx
+{
+  path: ROUTE_PATHS.ABOUT,
+  element: (
+    <Layout>
+      <LazyWrapper>
+        <About />
+      </LazyWrapper>
+    </Layout>
+  ),
+}
+```
+
+## Layout Architecture
+
+### Layout System (`client/layout/`)
+
+The application uses a consistent layout system that wraps all pages:
+
+```typescript
+Layout Module Structure:
+├── Layout.tsx             # Main layout wrapper component
+│   ├── Background styling (min-h-screen, theme colors)
+│   ├── Main content area
+│   └── BottomNavigation component
+├── BottomNavigation.tsx   # Bottom navigation bar
+│   ├── Mobile menu button
+│   ├── REVZ logo (SVG)
+│   └── Download app CTA button
+├── LoadingFallback.tsx    # Loading state component
+│   ├── Centered loading spinner
+│   ├── REVZ brand colors (red spinner)
+│   └── Loading message
+└── index.ts              # Clean exports for layout components
+```
+
+**Layout Features**:
+- **Consistent Structure**: All pages automatically include bottom navigation
+- **Theme Integration**: Background colors adapt to light/dark theme
+- **Responsive Design**: Mobile-first approach with responsive spacing
+- **Brand Consistency**: REVZ logo and colors throughout
+
+### Layout Usage Pattern
+
+```typescript
+// Automatic layout wrapping via routing system
+<Layout>
+  <PageComponent />  // Any page content
+</Layout>
+
+// Results in:
+<div className="min-h-screen bg-white dark:bg-revz-dark">
+  <main>{children}</main>
+  <BottomNavigation />
+</div>
+```
 
 ## Component Architecture
 
@@ -217,24 +318,21 @@ Landing Page Sections:
 │   ├── Stats Card (User metrics)
 │   └── Pricing Cards (Plans display)
 │
-├── Features Section (4-column grid)
-│   ├── Feature 01: Live Race Tracking
-│   ├── Feature 02: Personalized Feed  
-│   ├── Feature 03: Interactive Circuit Maps
-│   └── Feature 04: Stats Hub
-│
-└── Bottom Navigation
-    ├── Mobile Menu Button
-    ├── REVZ Logo (SVG)
-    └── Download App CTA
+└── Features Section (4-column grid)
+    ├── Feature 01: Live Race Tracking
+    ├── Feature 02: Personalized Feed  
+    ├── Feature 03: Interactive Circuit Maps
+    └── Feature 04: Stats Hub
 ```
 
 **Key Implementation Details**:
+- **Layout Integration**: No longer includes bottom navigation (handled by Layout)
 - **Responsive Design**: Mobile-first with `sm:`, `lg:` breakpoints
 - **Theme Integration**: Uses `useTheme()` hook with mounted state check
 - **Image Handling**: External URLs from Builder.io CDN
 - **Typography**: Brand fonts (`font-nevera`, `font-numans`)
 - **Color Usage**: Brand colors (`revz-red`, `revz-dark`)
+- **Background Styling**: Removed (now handled by Layout component)
 
 ### NotFound.tsx - 404 Error Page
 
@@ -284,6 +382,8 @@ import type { ApiResponse } from "@shared/types"
 ### Import Conventions
 - **UI Components**: `@/components/ui/[component]`
 - **Pages**: `@/pages/[page]`
+- **Routes**: `@/routes` (for routing system)
+- **Layout**: `@/layout` (for layout components)
 - **Utils**: `@/lib/[utility]`
 - **Assets**: Relative paths from component location
 - **External Libraries**: Standard npm imports
@@ -327,8 +427,10 @@ Client Build Settings:
 #### Adding New Page Component
 1. Create component file in `client/pages/[PageName].tsx`
 2. Export default React component function
-3. Add route in `client/App.tsx` Routes configuration
-4. Use existing UI components from `@/components/ui/`
+3. Add route path in `client/routes/paths.ts` (`ROUTE_PATHS` object)
+4. Add route mapping in `client/routes/components.tsx` (`routeComponents` array)
+5. Layout is automatically applied via routing system
+6. Use existing UI components from `@/components/ui/`
 
 #### Adding New UI Component
 1. Create component in `client/components/ui/[component].tsx`
@@ -351,13 +453,23 @@ Client Build Settings:
 ### File Navigation for AI Agents
 
 **Start Points**:
-- **App Entry**: `client/App.tsx`
+- **App Entry**: `client/main.tsx` → `client/App.tsx`
+- **Routing System**: `client/routes/index.ts`
+- **Layout System**: `client/layout/index.ts`
 - **Main Page**: `client/pages/Index.tsx`  
 - **Global Styles**: `client/global.css`
 - **Component Library**: `client/components/ui/`
 
 **Key Files to Understand**:
+- **Routing Architecture**: How paths and components are organized in `client/routes/`
+- **Layout System**: Automatic layout wrapping in `client/layout/`
 - **Theme System**: Usage of `useTheme` hook and CSS variables
 - **Responsive Design**: Tailwind breakpoint usage patterns
 - **Component Composition**: How Radix UI primitives are extended
 - **Type Safety**: TypeScript integration with React components
+
+**Architecture Patterns**:
+- **Centralized Routing**: All routes defined in dedicated routing module
+- **Automatic Layout**: Pages automatically wrapped with consistent layout
+- **Lazy Loading**: Built-in code splitting support with loading states
+- **Module Organization**: Clear separation between routes, layout, pages, and components
