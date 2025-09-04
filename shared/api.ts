@@ -5,8 +5,15 @@
  */
 
 /**
- * Example response type for /api/demo
+ * Response type for /api/demo
  */
 export interface DemoResponse {
+  message: string;
+}
+
+/**
+ * Response type for /api/ping
+ */
+export interface PingResponse {
   message: string;
 }

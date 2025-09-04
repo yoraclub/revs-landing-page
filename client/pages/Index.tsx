@@ -1,6 +1,7 @@
 import { Play, Twitter, Instagram, Facebook, ArrowUpRight, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { getDemoMessage } from "@/api/demo";
 
 export default function Index() {
   const { theme, setTheme } = useTheme();
@@ -8,6 +9,18 @@ export default function Index() {
 
   useEffect(() => {
     setMounted(true);
+    
+    // Test API connection
+    const testAPI = async () => {
+      try {
+        const data = await getDemoMessage();
+        console.log('API Connected:', data.message);
+      } catch (error) {
+        console.error('API Error:', error);
+      }
+    };
+
+    testAPI();
   }, []);
 
   if (!mounted) {

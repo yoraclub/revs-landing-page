@@ -15,6 +15,8 @@ The client module is organized into the following directories:
 - **routes/** - Centralized routing system (paths, components, lazy loading)
 - **layout/** - Layout components (Layout, BottomNavigation, LoadingFallback)
 - **components/ui/** - Reusable UI components based on Radix UI primitives
+- **api/** - API functions for server communication (demo.ts, ping.ts, index.ts)
+- **config/** - Global configuration files (axios.ts)
 
 ## Application Architecture
 
@@ -103,7 +105,10 @@ Import conventions:
 - Pages: `@/pages/[page]`
 - Routes: `@/routes`
 - Layout: `@/layout`
+- API functions: `@/api`
+- Configuration: `@/config/[config]`
 - Utilities: `@/lib/[utility]`
+- Shared types: `@shared/[module]`
 
 ## Build Integration
 
@@ -140,7 +145,10 @@ Import conventions:
 - Support dark mode via CSS variables
 
 ### API Integration
-- Use React Query for server state management
-- Target `/api/*` endpoints during development
-- Implement proper loading and error states
-- Cache responses appropriately
+- **HTTP Client**: Axios with global configuration in `config/axios.ts`
+- **API Functions**: Centralized API calls in `api/` directory exported as functions
+- **Response Types**: All API response types defined in `@shared/api.ts`
+- **Server State**: React Query for caching and state management
+- **Base Configuration**: `/api/*` endpoints with interceptors for logging
+- **Error Handling**: Consistent error handling across all API calls
+- **Type Safety**: Full TypeScript support with shared interface definitions
