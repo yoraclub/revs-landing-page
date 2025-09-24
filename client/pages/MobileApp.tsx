@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ROUTE_PATHS } from "@/routes/paths";
+import { TracingBeam } from "@/components/aceternity/tracing-beam";
 
 export default function MobileApp() {
   const { theme, setTheme } = useTheme();
@@ -125,63 +126,73 @@ export default function MobileApp() {
         </div>
       </div>
 
-      {/* Features Section */}
-      <div className="mx-2 sm:mx-4 lg:mx-8 my-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-nevera mb-4 text-foreground">
-            Powerful Features
-          </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Everything you need to stay connected with Formula 1, designed for mobile-first experience
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {features.map((feature, index) => (
-            <Card key={index} className="text-center hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex justify-center mb-4">
-                  {feature.icon}
-                </div>
-                <CardTitle className="text-xl font-nevera">{feature.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">{feature.description}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-
-      {/* Screenshots Section */}
-      <div className="mx-2 sm:mx-4 lg:mx-8 my-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-nevera mb-4 text-foreground">
-            App Screenshots
-          </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Take a look inside the REVZ mobile experience
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {screenshots.map((screenshot, index) => (
-            <div key={index} className="text-center">
-              <div className="relative mx-auto mb-6 w-64 h-96 sm:w-72 sm:h-[432px] bg-gray-900 rounded-[2rem] p-4 shadow-2xl">
-                <div className="w-full h-full rounded-[1.5rem] overflow-hidden bg-black">
-                  <img
-                    src={screenshot.image}
-                    alt={screenshot.title}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </div>
-              <h3 className="text-xl font-nevera mb-2 text-foreground">{screenshot.title}</h3>
-              <p className="text-muted-foreground">{screenshot.description}</p>
+      <TracingBeam className="px-6">
+        <div className="max-w-4xl mx-auto antialiased pt-4 relative">
+          {/* Features Section */}
+          <div className="mb-16">
+            <div className="text-center mb-12">
+              <h2 className="bg-revz-red text-white rounded-full text-sm w-fit px-4 py-1 mb-4 mx-auto">
+                App Features
+              </h2>
+              <h3 className="text-3xl sm:text-4xl font-nevera mb-4 text-foreground">
+                Powerful Features
+              </h3>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                Everything you need to stay connected with Formula 1, designed for mobile-first experience
+              </p>
             </div>
-          ))}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {features.map((feature, index) => (
+                <Card key={index} className="text-center hover:shadow-lg transition-shadow mb-10">
+                  <CardHeader>
+                    <div className="flex justify-center mb-4">
+                      {feature.icon}
+                    </div>
+                    <CardTitle className="text-xl font-nevera">{feature.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground">{feature.description}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* Screenshots Section */}
+          <div className="mb-16">
+            <div className="text-center mb-12">
+              <h2 className="bg-revz-red text-white rounded-full text-sm w-fit px-4 py-1 mb-4 mx-auto">
+                App Preview
+              </h2>
+              <h3 className="text-3xl sm:text-4xl font-nevera mb-4 text-foreground">
+                App Screenshots
+              </h3>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                Take a look inside the REVZ mobile experience
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {screenshots.map((screenshot, index) => (
+                <div key={index} className="text-center mb-10">
+                  <div className="relative mx-auto mb-6 w-64 h-96 sm:w-72 sm:h-[432px] bg-gray-900 rounded-[2rem] p-4 shadow-2xl">
+                    <div className="w-full h-full rounded-[1.5rem] overflow-hidden bg-black">
+                      <img
+                        src={screenshot.image}
+                        alt={screenshot.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-nevera mb-2 text-foreground">{screenshot.title}</h3>
+                  <p className="text-muted-foreground">{screenshot.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
+      </TracingBeam>
 
       {/* Download CTA Section */}
       <div className="mx-2 sm:mx-4 lg:mx-8 my-16">

@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ROUTE_PATHS } from "@/routes/paths";
+import { TracingBeam } from "@/components/aceternity/tracing-beam";
 
 export default function Features() {
   const { theme, setTheme } = useTheme();
@@ -141,65 +142,69 @@ export default function Features() {
         </div>
       </div>
 
-      {/* Core Features Section */}
-      <div className="mx-2 sm:mx-4 lg:mx-8 my-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-nevera mb-4 text-foreground">
-            Core Features
-          </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Everything you need for the ultimate Formula 1 experience
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {coreFeatures.map((feature, index) => (
-            <Card key={index} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-center mb-4">
-                  {feature.icon}
-                  <CardTitle className="text-xl font-nevera ml-4">{feature.title}</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-4">{feature.description}</p>
-                <ul className="space-y-2">
-                  {feature.details.map((detail, idx) => (
-                    <li key={idx} className="flex items-center text-sm">
-                      <div className="w-2 h-2 bg-revz-red rounded-full mr-3 flex-shrink-0" />
-                      {detail}
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-
-      {/* Additional Features Section */}
-      <div className="mx-2 sm:mx-4 lg:mx-8 my-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-nevera mb-4 text-foreground">
-            Additional Features
-          </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Even more ways to enhance your F1 experience
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {additionalFeatures.map((feature, index) => (
-            <div key={index} className="flex items-start space-x-4 p-6 rounded-lg border bg-card">
-              {feature.icon}
-              <div>
-                <h3 className="font-nevera text-lg mb-2">{feature.title}</h3>
-                <p className="text-muted-foreground text-sm">{feature.description}</p>
-              </div>
+      <TracingBeam className="px-6">
+        <div className="max-w-4xl mx-auto antialiased pt-4 relative">
+          {/* Core Features Section */}
+          <div className="mb-16">
+            <div className="text-center mb-12">
+              <h2 className="bg-revz-red text-white rounded-full text-sm w-fit px-4 py-1 mb-4 mx-auto">
+                Core Features
+              </h2>
+              <h3 className="text-3xl sm:text-4xl font-nevera mb-4 text-foreground">
+                Everything you need for the ultimate Formula 1 experience
+              </h3>
             </div>
-          ))}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {coreFeatures.map((feature, index) => (
+                <Card key={index} className="hover:shadow-lg transition-shadow mb-10">
+                  <CardHeader>
+                    <div className="flex items-center mb-4">
+                      {feature.icon}
+                      <CardTitle className="text-xl font-nevera ml-4">{feature.title}</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground mb-4">{feature.description}</p>
+                    <ul className="space-y-2">
+                      {feature.details.map((detail, idx) => (
+                        <li key={idx} className="flex items-center text-sm">
+                          <div className="w-2 h-2 bg-revz-red rounded-full mr-3 flex-shrink-0" />
+                          {detail}
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* Additional Features Section */}
+          <div className="mb-16">
+            <div className="text-center mb-12">
+              <h2 className="bg-revz-red text-white rounded-full text-sm w-fit px-4 py-1 mb-4 mx-auto">
+                Additional Features
+              </h2>
+              <h3 className="text-3xl sm:text-4xl font-nevera mb-4 text-foreground">
+                Even more ways to enhance your F1 experience
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {additionalFeatures.map((feature, index) => (
+                <div key={index} className="flex items-start space-x-4 p-6 rounded-lg border bg-card mb-10">
+                  {feature.icon}
+                  <div>
+                    <h3 className="font-nevera text-lg mb-2">{feature.title}</h3>
+                    <p className="text-muted-foreground text-sm">{feature.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
+      </TracingBeam>
 
     </div>
   );
