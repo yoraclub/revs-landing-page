@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ROUTE_PATHS } from "@/routes/paths";
+import { Cover } from "@/components/aceternity/WarpSpeed/cover";
 
 export default function HeroCard() {
   return (
@@ -15,7 +16,7 @@ export default function HeroCard() {
       <div className="relative z-10 px-6 py-8 sm:px-8 sm:py-12 lg:px-16 lg:py-14">
         <div className="max-w-2xl">
           <h1 className="text-white font-nevera text-2xl sm:text-3xl lg:text-5xl leading-tight mb-6 sm:mb-8">
-            The ultimate Formula 1 companion app. built for fans in the fast lane.
+            The ultimate Formula 1 companion app. built for fans in the <Cover>fast lane</Cover>.
           </h1>
           <Link
             to={ROUTE_PATHS.MOBILE_APP}
