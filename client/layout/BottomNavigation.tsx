@@ -1,4 +1,6 @@
 import { Menu } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ROUTE_PATHS } from "@/routes/paths";
 
 export default function BottomNavigation() {
   return (
@@ -41,9 +43,12 @@ export default function BottomNavigation() {
         </div>
 
         {/* Download Button */}
-        <button className="bg-revz-red hover:bg-revz-red/90 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-full font-nevera text-xs sm:text-sm uppercase tracking-widest transition-colors">
+        <Link
+          to={ROUTE_PATHS.MOBILE_APP}
+          className="bg-revz-red hover:bg-revz-red/90 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-full font-nevera text-xs sm:text-sm uppercase tracking-widest transition-colors inline-block"
+        >
           Download App
-        </button>
+        </Link>
       </div>
     </div>
   );

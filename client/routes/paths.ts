@@ -6,12 +6,14 @@
 export const ROUTE_PATHS = {
   // Main routes
   HOME: "/",
+  MOBILE_APP: "/mobile-app",
+  FEATURES: "/features",
+  PRICING: "/pricing",
   NOT_FOUND: "*",
-  
+
   // Add more routes here as needed
   // ABOUT: "/about",
   // CONTACT: "/contact",
-  // PRICING: "/pricing",
 } as const;
 
 // Type helper for route paths
@@ -30,6 +32,21 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
     path: ROUTE_PATHS.HOME,
     title: "REVZ - Formula 1 Companion App",
     description: "The ultimate Formula 1 companion app built for fans in the fast lane.",
+  },
+  MOBILE_APP: {
+    path: ROUTE_PATHS.MOBILE_APP,
+    title: "REVZ Mobile App - Formula 1 Companion",
+    description: "Download the REVZ mobile app for real-time race data, driver insights, and exclusive F1 content.",
+  },
+  FEATURES: {
+    path: ROUTE_PATHS.FEATURES,
+    title: "REVZ Features - Formula 1 App Features",
+    description: "Explore all the powerful features of REVZ: real-time race data, analytics, driver profiles, and more.",
+  },
+  PRICING: {
+    path: ROUTE_PATHS.PRICING,
+    title: "REVZ Pricing - Choose Your Plan",
+    description: "Choose the perfect REVZ plan for your F1 passion. Free forever option or premium features with Fast Lane Pro.",
   },
   NOT_FOUND: {
     path: ROUTE_PATHS.NOT_FOUND,

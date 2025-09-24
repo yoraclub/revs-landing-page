@@ -1,4 +1,6 @@
 import { ArrowUpRight } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ROUTE_PATHS } from "@/routes/paths";
 
 export default function FeaturesSection() {
   return (
@@ -56,11 +58,25 @@ export default function FeaturesSection() {
               </p>
             </div>
             <div className="absolute -top-8 -right-4">
-              <div className="w-12 h-12 flex items-center justify-center">
+              <Link
+                to={ROUTE_PATHS.FEATURES}
+                className="w-12 h-12 flex items-center justify-center hover:scale-110 transition-transform"
+              >
                 <ArrowUpRight className="w-6 h-6 text-revz-red transform rotate-45" />
-              </div>
+              </Link>
             </div>
           </div>
+        </div>
+
+        {/* See All Features Button */}
+        <div className="text-center mt-12">
+          <Link
+            to={ROUTE_PATHS.FEATURES}
+            className="inline-flex items-center bg-revz-red hover:bg-revz-red/90 text-white px-8 py-4 rounded-full font-nevera text-sm uppercase tracking-widest transition-colors"
+          >
+            See All Features
+            <ArrowUpRight className="w-4 h-4 ml-2" />
+          </Link>
         </div>
       </div>
     </div>

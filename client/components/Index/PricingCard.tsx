@@ -1,4 +1,6 @@
 import { ArrowUpRight } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ROUTE_PATHS } from "@/routes/paths";
 
 export default function PricingCard() {
   return (
@@ -18,12 +20,17 @@ export default function PricingCard() {
             <p className="font-numans text-sm leading-relaxed">Perfect for casual fans who want to stay connected to the race weekend.</p>
           </div>
         </div>
-        <div className="font-nevera text-xl text-revz-red tracking-wide mt-4">PRICING</div>
+        <Link to={ROUTE_PATHS.PRICING} className="font-nevera text-xl text-revz-red tracking-wide mt-4 hover:text-revz-red/80 transition-colors">
+          PRICING
+        </Link>
       </div>
       <div className="absolute right-0 -mr-6">
-        <button className="w-12 h-12 rounded-full border border-black/10 dark:border-white/20 flex items-center justify-center">
+        <Link
+          to={ROUTE_PATHS.PRICING}
+          className="w-12 h-12 rounded-full border border-black/10 dark:border-white/20 flex items-center justify-center hover:scale-110 transition-transform"
+        >
           <ArrowUpRight className="w-6 h-6 text-revz-red rotate-45" />
-        </button>
+        </Link>
       </div>
     </div>
   );

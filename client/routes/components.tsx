@@ -10,6 +10,9 @@ import { Layout, LoadingFallback } from "@/layout";
 
 // Import page components
 import Index from "@/pages/Index";
+import MobileApp from "@/pages/MobileApp";
+import Features from "@/pages/Features";
+import Pricing from "@/pages/Pricing";
 import NotFound from "@/pages/NotFound";
 
 // Lazy-loaded components for code splitting (add as needed)
@@ -30,6 +33,30 @@ export const routeComponents = [
     element: (
       <Layout>
         <Index />
+      </Layout>
+    ),
+  },
+  {
+    path: ROUTE_PATHS.MOBILE_APP,
+    element: (
+      <Layout>
+        <MobileApp />
+      </Layout>
+    ),
+  },
+  {
+    path: ROUTE_PATHS.FEATURES,
+    element: (
+      <Layout>
+        <Features />
+      </Layout>
+    ),
+  },
+  {
+    path: ROUTE_PATHS.PRICING,
+    element: (
+      <Layout>
+        <Pricing />
       </Layout>
     ),
   },
@@ -67,4 +94,4 @@ export const getRouteComponent = (path: string) => {
 };
 
 // Export components for direct import if needed
-export { Index, NotFound, LazyWrapper };
+export { Index, MobileApp, Features, Pricing, NotFound, LazyWrapper };

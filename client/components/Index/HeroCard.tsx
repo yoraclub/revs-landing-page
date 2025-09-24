@@ -1,3 +1,6 @@
+import { Link } from "react-router-dom";
+import { ROUTE_PATHS } from "@/routes/paths";
+
 export default function HeroCard() {
   return (
     <div className="relative rounded-[24px] sm:rounded-[44px] overflow-hidden bg-black min-h-[260px] sm:min-h-[320px] lg:min-h-[389px] lg:col-span-2">
@@ -14,9 +17,12 @@ export default function HeroCard() {
           <h1 className="text-white font-nevera text-2xl sm:text-3xl lg:text-5xl leading-tight mb-6 sm:mb-8">
             The ultimate Formula 1 companion app. built for fans in the fast lane.
           </h1>
-          <button className="bg-revz-red hover:bg-revz-red/90 text-white px-8 py-4 rounded-full font-nevera text-sm uppercase tracking-widest transition-colors">
+          <Link
+            to={ROUTE_PATHS.MOBILE_APP}
+            className="bg-revz-red hover:bg-revz-red/90 text-white px-8 py-4 rounded-full font-nevera text-sm uppercase tracking-widest transition-colors inline-block"
+          >
             Download App
-          </button>
+          </Link>
         </div>
       </div>
     </div>
