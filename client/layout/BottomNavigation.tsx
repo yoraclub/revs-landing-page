@@ -5,14 +5,14 @@ import { ROUTE_PATHS } from "@/routes/paths";
 export default function BottomNavigation() {
   return (
     <div className="mx-2 mt-4 mb-4 sm:mx-4 sm:mt-8 sm:mb-8 lg:mx-8">
-      <div className="flex items-center justify-between py-6">
+      <div className="relative flex items-center py-6">
         {/* Menu */}
         <button className="lg:hidden">
           <Menu className="w-6 h-6 text-gray-900 dark:text-white" />
         </button>
 
         {/* Logo */}
-        <div className="flex-1 flex justify-center">
+        <div className="absolute left-1/2 transform -translate-x-1/2">
           <div className="w-40 h-[47px] text-gray-900 dark:text-white">
             <svg viewBox="0 0 180 47" fill="none" xmlns="http://www.w3.org/2000/svg">
               <g clipPath="url(#clip0)">
@@ -43,12 +43,14 @@ export default function BottomNavigation() {
         </div>
 
         {/* Download Button */}
-        <Link
-          to={ROUTE_PATHS.MOBILE_APP}
-          className="bg-revz-red hover:bg-revz-red/90 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-full font-nevera text-xs sm:text-sm uppercase tracking-widest transition-colors inline-block"
-        >
-          Download App
-        </Link>
+        <div className="ml-auto">
+          <Link
+            to={ROUTE_PATHS.MOBILE_APP}
+            className="bg-revz-red hover:bg-revz-red/90 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-full font-nevera text-xs sm:text-sm uppercase tracking-widest transition-colors inline-block"
+          >
+            Download App
+          </Link>
+        </div>
       </div>
     </div>
   );
