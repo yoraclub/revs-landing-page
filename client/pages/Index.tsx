@@ -33,7 +33,7 @@ export default function Index() {
   }
 
   return (
-    <div>
+    <div className="bg-background">
       {/* Theme Toggle */}
       <div className="fixed top-2 right-2 sm:top-4 sm:right-4 z-50">
         <button

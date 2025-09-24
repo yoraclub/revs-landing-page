@@ -143,7 +143,7 @@ export default function Pricing() {
   ];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       {/* Navigation Controls */}
       <div className="fixed top-2 left-2 right-2 sm:top-4 sm:left-4 sm:right-4 z-50 flex justify-between">
         <Link
