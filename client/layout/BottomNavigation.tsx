@@ -1,11 +1,17 @@
 import { Menu } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ROUTE_PATHS } from "@/routes/paths";
+import { AnimatedThemeToggler } from "@/components/animated-theme-toggler";
 
 export default function BottomNavigation() {
   return (
     <div className="mx-2 mt-4 mb-4 sm:mx-4 sm:mt-8 sm:mb-8 lg:mx-8">
       <div className="relative flex items-center py-6">
+        {/* Theme Toggle */}
+        <div className="mr-4">
+          <AnimatedThemeToggler className="w-12 h-12 bg-white dark:bg-gray-800 rounded-full shadow-lg flex items-center justify-center transition-colors" />
+        </div>
+
         {/* Menu */}
         <button className="lg:hidden">
           <Menu className="w-6 h-6 text-gray-900 dark:text-white" />
