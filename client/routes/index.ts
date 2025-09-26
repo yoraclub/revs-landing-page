@@ -6,8 +6,7 @@
 export { ROUTE_PATHS, ROUTE_CONFIG, type RoutePath, type RouteConfig } from "./paths";
 export { 
   routeComponents, 
-  createRoutes, 
-  getRouteComponent, 
+  createRoutes,
   Index, 
   NotFound,
   LazyWrapper 

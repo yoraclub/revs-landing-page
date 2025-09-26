@@ -7,6 +7,7 @@ import { lazy, Suspense } from "react";
 import { Route } from "react-router-dom";
 import { ROUTE_PATHS } from "./paths";
 import { Layout, LoadingFallback } from "@/layout";
+import { PageTransition } from "@/components/PageTransition";
 
 // Import page components
 import Index from "@/pages/Index";
@@ -32,7 +33,9 @@ export const routeComponents = [
     path: ROUTE_PATHS.HOME,
     element: (
       <Layout>
-        <Index />
+        <PageTransition>
+          <Index />
+        </PageTransition>
       </Layout>
     ),
   },
@@ -40,7 +43,9 @@ export const routeComponents = [
     path: ROUTE_PATHS.MOBILE_APP,
     element: (
       <Layout>
-        <MobileApp />
+        <PageTransition>
+          <MobileApp />
+        </PageTransition>
       </Layout>
     ),
   },
@@ -48,7 +53,9 @@ export const routeComponents = [
     path: ROUTE_PATHS.FEATURES,
     element: (
       <Layout>
-        <Features />
+        <PageTransition>
+          <Features />
+        </PageTransition>
       </Layout>
     ),
   },
@@ -56,7 +63,9 @@ export const routeComponents = [
     path: ROUTE_PATHS.PRICING,
     element: (
       <Layout>
-        <Pricing />
+        <PageTransition>
+          <Pricing />
+        </PageTransition>
       </Layout>
     ),
   },
@@ -64,7 +73,9 @@ export const routeComponents = [
     path: ROUTE_PATHS.NOT_FOUND,
     element: (
       <Layout>
-        <NotFound />
+        <PageTransition>
+          <NotFound />
+        </PageTransition>
       </Layout>
     ),
   },
@@ -86,11 +97,6 @@ export const createRoutes = () => {
   return routeComponents.map((route) => (
     <Route key={route.path} path={route.path} element={route.element} />
   ));
-};
-
-// Helper function to get route component by path
-export const getRouteComponent = (path: string) => {
-  return routeComponents.find((route) => route.path === path)?.element;
 };
 
 // Export components for direct import if needed
