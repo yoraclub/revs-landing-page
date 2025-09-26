@@ -1,12 +1,33 @@
 import { ArrowUpRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ROUTE_PATHS } from "@/routes/paths";
+import { useResponsive } from "@/hooks/use-mobile";
 
 export default function FeaturesSection() {
+  const { isMobile, isTablet, isDesktop } = useResponsive();
+
+  const getContainerClasses = () => {
+    if (isMobile) return "mt-4";
+    if (isTablet) return "mt-6";
+    return "mt-8";
+  };
+
+  const getCardClasses = () => {
+    if (isMobile) return "rounded-[24px] px-6 py-8";
+    if (isTablet) return "rounded-[32px] px-10 py-12";
+    return "rounded-[44px] px-16 py-16";
+  };
+
+  const getGridClasses = () => {
+    if (isMobile) return "grid-cols-1 gap-8";
+    if (isTablet) return "grid-cols-2 gap-10";
+    return "grid-cols-4 gap-12";
+  };
+
   return (
-    <div className="mx-2 mt-4 sm:mx-4 sm:mt-8 lg:mx-8">
-      <div className="bg-gray-50 dark:bg-gray-900 rounded-[24px] sm:rounded-[44px] px-4 py-8 sm:px-8 sm:py-16 lg:px-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12">
+    <div className={getContainerClasses()}>
+      <div className={`bg-gray-50 dark:bg-gray-900 ${getCardClasses()}`}>
+        <div className={`grid ${getGridClasses()}`}>
           {/* Feature 01 */}
           <div className="relative">
             <div className="text-6xl font-nevera text-gray-200 dark:text-white/10 absolute -top-4 -left-2">01</div>

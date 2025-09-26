@@ -1,55 +1,48 @@
 import { ArrowUpRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ROUTE_PATHS } from "@/routes/paths";
+import { useResponsive } from "@/hooks/use-mobile";
 
 export default function PricingCard() {
-  // Positioning and scale configuration
-  const config = {
-    background: {
-      top: 0,
-      left: 0,
-      bottom: undefined,
-      right: undefined,
-      scale: 1.0,
-    },
-    freeForever: {
-      top: 40,
-      left: -60,
-      bottom: undefined,
-      right: undefined,
-      scale: 1.0,
-    },
-    fastLane: {
-      top: 160,
-      left: 177,
-      bottom: undefined,
-      right: undefined,
-      scale: 1.0,
-    },
-    pricing: {
-      top: undefined,
-      left: 16,
-      bottom: 24,
-      right: undefined,
-      scale: 1.0,
-    },
-    arrow: {
-      top: 405,
-      left: 515,
-      bottom: undefined,
-      right: undefined,
-      scale: 1.0,
-    },
+  const { isMobile, isTablet, isDesktop } = useResponsive();
+
+  // Responsive positioning and scale configuration
+  const getConfig = () => {
+    if (isMobile) {
+      return {
+        background: { top: 0, left: 0, scale: 0.6 },
+        freeForever: { top: 20, left: -30, scale: 0.6 },
+        fastLane: { top: 80, left: 90, scale: 0.6 },
+        pricing: { left: 8, bottom: 12, scale: 0.8 },
+        arrow: { top: 200, left: 260, scale: 0.8 },
+      };
+    }
+    if (isTablet) {
+      return {
+        background: { top: 0, left: 0, scale: 0.8 },
+        freeForever: { top: 30, left: -45, scale: 0.8 },
+        fastLane: { top: 120, left: 130, scale: 0.8 },
+        pricing: { left: 12, bottom: 18, scale: 0.9 },
+        arrow: { top: 300, left: 380, scale: 0.9 },
+      };
+    }
+    return {
+      background: { top: 0, left: 0, scale: 1.0 },
+      freeForever: { top: 40, left: -60, scale: 1.0 },
+      fastLane: { top: 160, left: 177, scale: 1.0 },
+      pricing: { left: 16, bottom: 24, scale: 1.0 },
+      arrow: { top: 405, left: 515, scale: 1.0 },
+    };
   };
+
+  const config = getConfig();
   return (
-    <div className="relative hidden lg:flex items-center justify-center lg:col-start-3 lg:row-start-2 rounded-[24px] sm:rounded-[44px] overflow-hidden">
+    <div className="relative flex items-center justify-center rounded-[24px] sm:rounded-[44px] overflow-hidden min-h-[280px] sm:min-h-[320px] lg:min-h-[400px]">
       <div
         className="absolute -z-0 bg-[radial-gradient(circle,rgba(0,0,0,0.25)_2px,transparent_2px)] dark:bg-[radial-gradient(circle,rgba(255,255,255,0.25)_2px,transparent_2px)] [background-size:14px_14px] rounded-2xl"
         style={{
           top: config.background.top !== undefined ? `${config.background.top}px` : undefined,
           left: config.background.left !== undefined ? `${config.background.left}px` : undefined,
-          bottom: config.background.bottom !== undefined ? `${config.background.bottom}px` : undefined,
-          right: config.background.right !== undefined ? `${config.background.right}px` : undefined,
           width: `${256 * config.background.scale}px`,
           height: `${160 * config.background.scale}px`
         }}
@@ -61,9 +54,7 @@ export default function PricingCard() {
             className="absolute z-10"
             style={{
               top: config.fastLane.top !== undefined ? `${config.fastLane.top}px` : undefined,
-              left: config.fastLane.left !== undefined ? `${config.fastLane.left}px` : undefined,
-              bottom: config.fastLane.bottom !== undefined ? `${config.fastLane.bottom}px` : undefined,
-              right: config.fastLane.right !== undefined ? `${config.fastLane.right}px` : undefined
+              left: config.fastLane.left !== undefined ? `${config.fastLane.left}px` : undefined
             }}
           >
             <svg width={320 * config.fastLane.scale} height={320 * config.fastLane.scale} viewBox="0 0 335 335" className="shadow-xl">
@@ -88,9 +79,7 @@ export default function PricingCard() {
             className="absolute z-20"
             style={{
               top: config.freeForever.top !== undefined ? `${config.freeForever.top}px` : undefined,
-              left: config.freeForever.left !== undefined ? `${config.freeForever.left}px` : undefined,
-              bottom: config.freeForever.bottom !== undefined ? `${config.freeForever.bottom}px` : undefined,
-              right: config.freeForever.right !== undefined ? `${config.freeForever.right}px` : undefined
+              left: config.freeForever.left !== undefined ? `${config.freeForever.left}px` : undefined
             }}
           >
             <svg width={320 * config.freeForever.scale} height={320 * config.freeForever.scale} viewBox="0 0 335 335" className="relative">
@@ -109,13 +98,11 @@ export default function PricingCard() {
           <div
             className="absolute"
             style={{
-              top: config.pricing.top !== undefined ? `${config.pricing.top}px` : undefined,
               left: config.pricing.left !== undefined ? `${config.pricing.left}px` : undefined,
-              bottom: config.pricing.bottom !== undefined ? `${config.pricing.bottom}px` : undefined,
-              right: config.pricing.right !== undefined ? `${config.pricing.right}px` : undefined
+              bottom: config.pricing.bottom !== undefined ? `${config.pricing.bottom}px` : undefined
             }}
           >
-            <Link to={ROUTE_PATHS.PRICING} className="relative font-nevera text-4xl text-revz-red tracking-wide hover:text-revz-red/80 transition-colors">
+            <Link to={ROUTE_PATHS.PRICING} className={`relative font-nevera text-revz-red tracking-wide hover:text-revz-red/80 transition-colors ${isMobile ? 'text-2xl' : isTablet ? 'text-3xl' : 'text-4xl'}`}>
               PRICING
             </Link>
           </div>
@@ -125,9 +112,7 @@ export default function PricingCard() {
         className="absolute"
         style={{
           top: config.arrow.top !== undefined ? `${config.arrow.top}px` : undefined,
-          left: config.arrow.left !== undefined ? `${config.arrow.left}px` : undefined,
-          bottom: config.arrow.bottom !== undefined ? `${config.arrow.bottom}px` : undefined,
-          right: config.arrow.right !== undefined ? `${config.arrow.right}px` : undefined
+          left: config.arrow.left !== undefined ? `${config.arrow.left}px` : undefined
         }}
       >
         <Link

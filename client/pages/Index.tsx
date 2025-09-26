@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getHelloMessage } from "@/api/hello";
+import { useResponsive } from "@/hooks/use-mobile";
 import StoryCard from "@/components/Index/StoryCard";
 import HeroCard from "@/components/Index/HeroCard";
 import StatsCard from "@/components/Index/StatsCard";
@@ -8,6 +9,7 @@ import FeaturesSection from "@/components/Index/FeaturesSection";
 
 export default function Index() {
   const [mounted, setMounted] = useState(false);
+  const { isMobile, isTablet, isDesktop } = useResponsive();
 
   useEffect(() => {
     setMounted(true);
@@ -29,18 +31,31 @@ export default function Index() {
     return null;
   }
 
+  const getContainerClasses = () => {
+    if (isMobile) return 'w-full px-4 py-4';
+    if (isTablet) return 'w-full max-w-[900px] px-6 py-6';
+    return 'w-full max-w-[1440px] px-8 py-8';
+  };
+
+  const getGridClasses = () => {
+    if (isMobile) return 'grid grid-cols-1 gap-4';
+    if (isTablet) return 'grid grid-cols-2 gap-6';
+    return 'grid grid-cols-3 gap-8';
+  };
+
   return (
-    <div className="bg-background">
-      {/* Main Grid (Hero + Cards) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8 mx-2 mt-2 sm:mx-4 sm:mt-4 lg:mx-8 lg:mt-8">
-        <StoryCard />
-        <HeroCard />
-        <StatsCard />
-        <PricingCard />
+    <div className="bg-background min-h-screen flex justify-center">
+      <div className={getContainerClasses()}>
+        {/* Main Grid (Hero + Cards) */}
+        <div className={getGridClasses()}>
+          <StoryCard />
+          <HeroCard />
+          <StatsCard />
+          <PricingCard />
+        </div>
+
+        <FeaturesSection />
       </div>
-
-      <FeaturesSection />
-
     </div>
   );
 }
