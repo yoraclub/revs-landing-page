@@ -5,7 +5,7 @@ export default function StoryCard() {
     <div className="relative rounded-[24px] sm:rounded-[44px] overflow-hidden bg-black min-h-[400px] sm:min-h-[500px] lg:row-span-2 h-full">
       <div className="absolute inset-0">
         <img
-          src="https://api.builder.io/api/v1/image/assets/TEMP/9f6323c242bb1e859cb1fa7656e09a3e7a33035a?width=1160"
+          src="Story-Card-Image.png"
           alt="Formula 1 racing background"
           className="w-full h-full object-cover"
         />

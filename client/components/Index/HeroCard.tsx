@@ -7,7 +7,7 @@ export default function HeroCard() {
     <div className="relative rounded-[24px] sm:rounded-[44px] overflow-hidden bg-black min-h-[260px] sm:min-h-[320px] lg:min-h-[389px] lg:col-span-2">
       <div className="absolute inset-0">
         <img
-          src="https://api.builder.io/api/v1/image/assets/TEMP/488c2b39b92ddf59540f7aec11b62764ebebb92b?width=1586"
+          src="Hero-Card-Image.png"
           alt="Formula 1 car background"
           className="w-full h-full object-cover"
         />
