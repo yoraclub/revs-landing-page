@@ -10,38 +10,42 @@ export default function StatsCard() {
         </svg>
       </div>
 
-      <div className="relative z-10">
-        <div className="grid grid-cols-2 gap-8 mb-12">
+      <div className="relative z-10 h-full flex flex-col">
+        {/* Top stats section */}
+        <div className="grid grid-cols-2 gap-8 mb-8">
           <div>
-            <div className="text-sm font-numans opacity-80 mb-1">Active users</div>
-            <div className="text-2xl font-numans font-bold">5000+</div>
+            <div className="text-base font-numans opacity-90 mb-2">Active users</div>
+            <div className="text-3xl font-numans font-bold">5000+</div>
           </div>
-          <div>
-            <div className="text-sm font-numans opacity-80 mb-1">Download</div>
-            <div className="text-2xl font-numans font-bold">30.3k</div>
+          <div className="text-right">
+            <div className="text-base font-numans opacity-90 mb-2">Download</div>
+            <div className="text-3xl font-numans font-bold">30.3k</div>
           </div>
         </div>
 
-        <div className="text-center mb-12">
-          <h3 className="font-nevera text-3xl lg:text-4xl leading-tight">
+        {/* Center TRUSTED WORLD WIDE section */}
+        <div className="flex-1 flex items-center justify-center">
+          <h3 className="font-nevera text-4xl lg:text-5xl leading-tight text-center">
             TRUSTED<br />WORLD WIDE
           </h3>
         </div>
 
-        <div className="mb-8">
-          <div className="text-sm font-numans opacity-80 mb-1">Reviews</div>
-          <div className="text-2xl font-numans font-bold">1200+</div>
-        </div>
-
-        <div className="flex gap-4 justify-center">
-          <div className="w-12 h-12 bg-black/10 rounded-full flex items-center justify-center">
-            <Twitter className="w-5 h-5" />
+        {/* Bottom section with Reviews and Social Icons */}
+        <div className="flex items-end justify-between">
+          <div>
+            <div className="text-base font-numans opacity-90 mb-2">Reviews</div>
+            <div className="text-3xl font-numans font-bold">1200+</div>
           </div>
-          <div className="w-12 h-12 bg-black/10 rounded-full flex items-center justify-center">
-            <Instagram className="w-5 h-5" />
-          </div>
-          <div className="w-12 h-12 bg-black/10 rounded-full flex items-center justify-center">
-            <Facebook className="w-5 h-5" />
+          <div className="flex gap-3">
+            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+              <Twitter className="w-6 h-6" />
+            </div>
+            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+              <Instagram className="w-6 h-6" />
+            </div>
+            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+              <Facebook className="w-6 h-6" />
+            </div>
           </div>
         </div>
       </div>
