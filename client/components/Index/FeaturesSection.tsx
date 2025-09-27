@@ -78,7 +78,7 @@ export default function FeaturesSection() {
                 Dive into the numbers behind the speed. Explore driver and constructor standings, tire strategies, historical race data, and season records — all in one place.
               </p>
             </div>
-            <div className="absolute -top-8 -right-4">
+            <div className="absolute -bottom-8 -right-4">
               <Link
                 to={ROUTE_PATHS.FEATURES}
                 className="w-12 h-12 flex items-center justify-center hover:scale-110 transition-transform"
@@ -87,17 +87,6 @@ export default function FeaturesSection() {
               </Link>
             </div>
           </div>
-        </div>
-
-        {/* See All Features Button */}
-        <div className="text-center mt-12">
-          <Link
-            to={ROUTE_PATHS.FEATURES}
-            className="inline-flex items-center bg-revz-red hover:bg-revz-red/90 text-white px-8 py-4 rounded-full font-nevera text-sm uppercase tracking-widest transition-colors"
-          >
-            See All Features
-            <ArrowUpRight className="w-4 h-4 ml-2" />
-          </Link>
         </div>
       </div>
     </div>
