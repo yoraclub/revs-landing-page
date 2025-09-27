@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ROUTE_PATHS } from "@/routes/paths";
 import { TracingBeam } from "@/components/aceternity/tracing-beam";
+import { Iphone } from "@/components/Iphone";
 
 export default function MobileApp() {
   const { theme, setTheme } = useTheme();
@@ -47,7 +48,7 @@ export default function MobileApp() {
     {
       title: "Race Dashboard",
       description: "Live race tracking with real-time data",
-      image: "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=300&h=600&fit=crop&crop=center"
+      image: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=300&h=600&fit=crop&crop=center"
     },
     {
       title: "Driver Stats",
@@ -57,7 +58,7 @@ export default function MobileApp() {
     {
       title: "Circuit Guide",
       description: "Track layouts and sector analysis",
-      image: "https://images.unsplash.com/photo-1566568393045-df8883fea27a?w=300&h=600&fit=crop&crop=center"
+      image: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=300&h=600&fit=crop&crop=center"
     }
   ];
 
@@ -71,23 +72,13 @@ export default function MobileApp() {
         >
           <ArrowLeft className="w-5 h-5 text-gray-700 dark:text-white" />
         </Link>
-        <button
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className="w-12 h-12 bg-white dark:bg-gray-800 rounded-full shadow-lg flex items-center justify-center transition-colors"
-        >
-          {theme === "dark" ? (
-            <Sun className="w-5 h-5 text-yellow-500" />
-          ) : (
-            <Moon className="w-5 h-5 text-gray-700" />
-          )}
-        </button>
       </div>
 
       {/* Hero Section */}
       <div className="relative rounded-[24px] sm:rounded-[44px] overflow-hidden bg-black min-h-[400px] sm:min-h-[500px] mx-2 mt-2 sm:mx-4 sm:mt-4 lg:mx-8 lg:mt-8">
         <div className="absolute inset-0">
           <img
-            src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1600&h=800&fit=crop&crop=center"
+            src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d7b?w=1600&h=800&fit=crop&crop=center"
             alt="Formula 1 mobile app preview"
             className="w-full h-full object-cover"
           />
@@ -127,9 +118,9 @@ export default function MobileApp() {
       </div>
 
       <TracingBeam className="px-6">
-        <div className="max-w-4xl mx-auto antialiased pt-4 relative">
+        <div className="antialiased pt-4 relative">
           {/* Features Section */}
-          <div className="mb-16">
+          <div>
             <div className="text-center mb-12">
               <h2 className="bg-revz-red text-white rounded-full text-sm w-fit px-4 py-1 mb-4 mx-auto">
                 App Features
@@ -176,14 +167,8 @@ export default function MobileApp() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {screenshots.map((screenshot, index) => (
                 <div key={index} className="text-center mb-10">
-                  <div className="relative mx-auto mb-6 w-64 h-96 sm:w-72 sm:h-[432px] bg-gray-900 rounded-[2rem] p-4 shadow-2xl">
-                    <div className="w-full h-full rounded-[1.5rem] overflow-hidden bg-black">
-                      <img
-                        src={screenshot.image}
-                        alt={screenshot.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+                  <div className="relative mx-auto mb-6 w-64 sm:w-72">
+                    <Iphone src={screenshot.image} />
                   </div>
                   <h3 className="text-xl font-nevera mb-2 text-foreground">{screenshot.title}</h3>
                   <p className="text-muted-foreground">{screenshot.description}</p>

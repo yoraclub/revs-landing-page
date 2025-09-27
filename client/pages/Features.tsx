@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ROUTE_PATHS } from "@/routes/paths";
 import { TracingBeam } from "@/components/aceternity/tracing-beam";
+import { MacbookScroll } from "@/components/aceternity/macbook-scroll";
 
 export default function Features() {
   const { theme, setTheme } = useTheme();
@@ -98,16 +99,6 @@ export default function Features() {
         >
           <ArrowLeft className="w-5 h-5 text-gray-700 dark:text-white" />
         </Link>
-        <button
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className="w-12 h-12 bg-white dark:bg-gray-800 rounded-full shadow-lg flex items-center justify-center transition-colors"
-        >
-          {theme === "dark" ? (
-            <Sun className="w-5 h-5 text-yellow-500" />
-          ) : (
-            <Moon className="w-5 h-5 text-gray-700" />
-          )}
-        </button>
       </div>
 
       {/* Hero Section */}
@@ -142,8 +133,25 @@ export default function Features() {
         </div>
       </div>
 
+      {/* MacBook Demo Section */}
+      <div className="mb-32">
+        <MacbookScroll
+          src="https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=1200&h=800&fit=crop&crop=center"
+          title={
+            <div className="text-center">
+              <h2 className="text-4xl font-nevera mb-4 text-foreground">
+                Experience REVZ on Desktop
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Our web application provides the same powerful features with an optimized desktop experience for race analysis and data visualization.
+              </p>
+            </div>
+          }
+        />
+      </div>
+
       <TracingBeam className="px-6">
-        <div className="max-w-4xl mx-auto antialiased pt-4 relative">
+        <div className="max-w-4xl mx-auto antialiased pt-16 relative">
           {/* Core Features Section */}
           <div className="mb-16">
             <div className="text-center mb-12">

@@ -7,7 +7,7 @@ import { lazy, Suspense } from "react";
 import { Route } from "react-router-dom";
 import { ROUTE_PATHS } from "./paths";
 import { Layout, LoadingFallback } from "@/layout";
-import { PageTransition } from "@/components/PageTransition";
+import { PageTransition } from "@/layout/PageTransition";
 
 // Import page components
 import Index from "@/pages/Index";

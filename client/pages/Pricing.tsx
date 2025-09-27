@@ -152,16 +152,6 @@ export default function Pricing() {
         >
           <ArrowLeft className="w-5 h-5 text-gray-700 dark:text-white" />
         </Link>
-        <button
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className="w-12 h-12 bg-white dark:bg-gray-800 rounded-full shadow-lg flex items-center justify-center transition-colors"
-        >
-          {theme === "dark" ? (
-            <Sun className="w-5 h-5 text-yellow-500" />
-          ) : (
-            <Moon className="w-5 h-5 text-gray-700" />
-          )}
-        </button>
       </div>
 
       {/* Hero Section */}
