@@ -1,6 +1,7 @@
 import path from "path";
 import { createServer } from "./index";
 import * as express from "express";
+import { setupGracefulShutdown } from "./utils/shutdown";
 
 const app = createServer();
 const port = process.env.PORT || 3000;
@@ -22,19 +23,11 @@ app.use((req, res, next) => {
   res.sendFile(path.join(distPath, "index.html"));
 });
 
-app.listen(port, () => {
-  console.log(`🚀 Fusion Starter server running on port ${port}`);
+const server = app.listen(port, () => {
+  console.log(`🚀 REVZ server running on port ${port}`);
   console.log(`📱 Frontend: http://localhost:${port}`);
   console.log(`🔧 API: http://localhost:${port}/api`);
 });
 
-// Graceful shutdown
-process.on("SIGTERM", () => {
-  console.log("🛑 Received SIGTERM, shutting down gracefully");
-  process.exit(0);
-});
-
-process.on("SIGINT", () => {
-  console.log("🛑 Received SIGINT, shutting down gracefully");
-  process.exit(0);
-});
+// Setup graceful shutdown handlers
+setupGracefulShutdown(server);

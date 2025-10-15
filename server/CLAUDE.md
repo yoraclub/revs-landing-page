@@ -10,8 +10,15 @@ The server module is a Node.js Express.js application built with TypeScript. It 
 server/
 ├── index.ts                # Main server configuration and setup
 ├── node-build.ts          # Production server entry point
+├── config/                # Configuration modules
+│   ├── cors.ts           # CORS configuration with env variables
+│   └── express.ts        # Express middleware config (body limits)
+├── middleware/            # Express middleware
+│   └── errorHandler.ts   # Global error handling + async wrapper
+├── utils/                 # Utility functions
+│   └── shutdown.ts       # Graceful shutdown handler
 └── routes/                # API route handlers
-    └── demo.ts            # Example API endpoint
+    └── hello.ts          # Example API endpoint
 ```
 
 ## Application Architecture
@@ -23,31 +30,46 @@ server/
 Server Configuration:
 ├── Express App Instance
 ├── Middleware Stack
-│   ├── cors()                    # Cross-origin requests
-│   ├── express.json()            # JSON body parsing
-│   └── express.urlencoded()      # Form data parsing
+│   ├── cors(corsConfig)              # Cross-origin requests (environment-based)
+│   ├── express.json({ limit: 10mb }) # JSON body parsing with size limit
+│   └── express.urlencoded()          # Form data parsing with size limit
 ├── API Routes
-│   ├── GET /api/ping            # Health check endpoint
-│   └── GET /api/demo            # Demo functionality
-└── Return configured Express app
+│   ├── GET /api/ping                # Health check endpoint
+│   └── GET /api/hello               # Example API endpoint
+└── Error Handling Middleware
+    └── errorHandler                 # Global error handler (must be last)
 ```
 
 ### Middleware Stack Details
 
 1. **CORS (Cross-Origin Resource Sharing)**
-   - **Purpose**: Enables frontend-backend communication in development
-   - **Configuration**: Default settings (all origins allowed)
-   - **Production**: Should be configured with specific origins
+   - **Location**: `server/config/cors.ts`
+   - **Purpose**: Enables frontend-backend communication
+   - **Configuration**: Environment-based via `ALLOWED_ORIGINS`
+   - **Default**: Falls back to `*` if not configured
+   - **Allowed Methods**: GET, POST, PUT, DELETE, PATCH, OPTIONS
+   - **Credentials**: Enabled for cookie support
 
 2. **Express JSON Parser**
+   - **Location**: `server/config/express.ts`
    - **Purpose**: Parses incoming JSON request bodies
-   - **Configuration**: `express.json()` with default settings
+   - **Configuration**: `express.json({ limit: "10mb" })`
    - **Usage**: Available as `req.body` in route handlers
+   - **Security**: 10MB limit prevents DoS attacks
 
 3. **Express URL-Encoded Parser**
-   - **Purpose**: Parses form-encoded request bodies  
-   - **Configuration**: `express.urlencoded({ extended: true })`
+   - **Location**: `server/config/express.ts`
+   - **Purpose**: Parses form-encoded request bodies
+   - **Configuration**: `express.urlencoded({ extended: true, limit: "10mb" })`
    - **Usage**: Supports nested objects in form data
+   - **Security**: 10MB limit prevents DoS attacks
+
+4. **Global Error Handler**
+   - **Location**: `server/middleware/errorHandler.ts`
+   - **Purpose**: Catches all unhandled errors and returns JSON responses
+   - **Position**: Must be registered last in middleware stack
+   - **Features**: Structured error logging, environment-aware stack traces
+   - **Async Support**: Includes `asyncHandler` wrapper for async routes
 
 ### API Route Architecture
 
@@ -61,13 +83,13 @@ Server Configuration:
    Response: { message: string } (from PING_MESSAGE env var)
    ```
 
-2. **Demo Endpoint** 
+2. **Hello Endpoint**
    ```typescript
-   // GET /api/demo  
-   Location: server/routes/demo.ts
-   Handler: handleDemo function
+   // GET /api/hello
+   Location: server/routes/hello.ts
+   Handler: handleHello function
    Purpose: Example API implementation
-   Response: DemoResponse type from @shared/api
+   Response: HelloResponse type from @shared/api
    ```
 
 #### Route Handler Pattern
@@ -129,12 +151,24 @@ dist/
 
 ### Graceful Shutdown Implementation
 
+**Location**: `server/utils/shutdown.ts`
+
 ```typescript
 Shutdown Signals:
 ├── SIGTERM (Termination signal from process manager)
-│   └── Logged shutdown message → process.exit(0)
+│   ├── Close server to stop accepting new connections
+│   ├── Wait for in-flight requests to complete
+│   ├── 10-second timeout for forced shutdown
+│   └── Clean exit with status code
 └── SIGINT (Interrupt signal, Ctrl+C)
-    └── Logged shutdown message → process.exit(0)
+    └── Same graceful shutdown process
+
+Shutdown Flow:
+1. Receive signal (SIGTERM or SIGINT)
+2. Call server.close() to stop accepting connections
+3. Wait for existing connections to finish
+4. If timeout (10s) expires, force shutdown
+5. Exit process with appropriate code
 ```
 
 ## Build Configuration
@@ -175,24 +209,43 @@ Vite Server Build Configuration:
 ### Environment Variables
 
 **Current Usage**:
-- `PING_MESSAGE`: Custom message for health check endpoint (defaults to "ping pong")
-- `PORT`: Server port (default: 3000 in production)
-- `NODE_ENV`: Runtime environment (set to "production" in build)
+- `PORT`: Server port (default: 3000)
+- `NODE_ENV`: Runtime environment ("development" or "production")
+- `ALLOWED_ORIGINS`: Comma-separated list of allowed CORS origins (defaults to "*")
+- `PING_MESSAGE`: Custom message for health check endpoint (defaults to "ping")
 
 **Access Pattern**:
 ```typescript
 // Server-side only access
-const customMessage = process.env.PING_MESSAGE ?? "ping pong";
 const port = process.env.PORT || 3000;
+const origins = process.env.ALLOWED_ORIGINS?.split(",") || "*";
+const pingMessage = process.env.PING_MESSAGE ?? "ping";
 ```
 
 ### Configuration Loading
 
+**Environment File Structure**:
+```
+.env                # Local environment (gitignored)
+.env.example        # Template for developers (committed to git)
+```
+
 **Environment Access**:
 ```typescript
 // server/index.ts
-// Environment variables accessed directly via process.env
-// No .env file - variables set via system or deployment platform
+import "dotenv/config";  // Loads .env file automatically
+
+// Access environment variables
+process.env.VARIABLE_NAME
+```
+
+**Development Setup**:
+```bash
+# .env file
+PORT=3000
+NODE_ENV=development
+ALLOWED_ORIGINS=http://localhost:8080,http://localhost:3000
+PING_MESSAGE=pong
 ```
 
 ## API Development Patterns
@@ -225,16 +278,16 @@ const port = process.env.PORT || 3000;
 **Pattern Used**:
 ```typescript
 // @shared/api.ts
-export interface DemoResponse {
+export interface HelloResponse {
   message: string;
 }
 
-// server/routes/demo.ts
-import { DemoResponse } from "@shared/api";
+// server/routes/hello.ts
+import { HelloResponse } from "@shared/api";
 
-export const handleDemo: RequestHandler = (req, res) => {
-  const response: DemoResponse = {
-    message: "Hello from Express server",
+export const handleHello: RequestHandler = (req, res) => {
+  const response: HelloResponse = {
+    message: "Hello from Revs server",
   };
   res.status(200).json(response);
 };
@@ -306,34 +359,75 @@ function expressPlugin(): Plugin {
 
 ## Error Handling Architecture
 
-### Current Error Handling
+### Global Error Handling (Implemented)
 
-**API Route Errors**:
-- Unhandled errors bubble up to Express default handler
-- Returns HTML error page (not API-friendly)
+**Location**: `server/middleware/errorHandler.ts`
 
-**Production Route Protection**:
+**Error Handler Function**:
 ```typescript
-// API route 404 handling
+export const errorHandler = (
+  err: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  // Structured error logging
+  console.error("Server error:", {
+    message: err.message,
+    stack: err.stack,
+    path: req.path,
+    method: req.method,
+  });
+
+  // JSON error response
+  res.status(500).json({
+    error: "Internal server error",
+    message: err.message,
+    ...(process.env.NODE_ENV !== "production" && { stack: err.stack }),
+  });
+};
+```
+
+**Features**:
+- Catches all unhandled errors across the application
+- Returns JSON responses (never HTML error pages)
+- Environment-aware stack trace inclusion
+- Structured error logging with request context
+- Must be registered last in middleware stack
+
+### Async Route Handler Wrapper
+
+**Purpose**: Automatically catch errors from async route handlers
+
+**Usage Pattern**:
+```typescript
+import { asyncHandler } from "../middleware/errorHandler";
+
+export const handleAsyncRoute = asyncHandler(async (req, res) => {
+  // Async operations - errors automatically caught
+  const data = await fetchData();
+  res.json({ data });
+});
+```
+
+**Benefits**:
+- No need for try-catch in every async route
+- Errors automatically passed to global error handler
+- Cleaner route handler code
+
+### Production Route Protection
+
+**API Route 404 Handling**:
+```typescript
+// server/node-build.ts
 if (req.path.startsWith("/api/") || req.path.startsWith("/health")) {
   return res.status(404).json({ error: "API endpoint not found" });
 }
 ```
 
-### Recommended Error Handling Patterns
+### Route-Level Error Handling (Optional)
 
-**Global Error Middleware**:
-```typescript
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  console.error(err.stack);
-  res.status(500).json({ 
-    error: "Internal server error",
-    ...(process.env.NODE_ENV === "development" && { stack: err.stack })
-  });
-});
-```
-
-**Route-Level Error Handling**:
+For custom error handling in specific routes:
 ```typescript
 export const handler: RequestHandler = async (req, res) => {
   try {
@@ -382,16 +476,19 @@ export const handler: RequestHandler = async (req, res) => {
 4. Test via `/api/[endpoint]` in development
 
 #### Environment Configuration
-1. Set variables via system environment or deployment platform
-2. Access via `process.env.VARIABLE_NAME`
-3. Provide defaults for production safety
-4. Document usage in this file
+1. Add variable to `.env` file for local development
+2. Update `.env.example` with the new variable
+3. Access via `process.env.VARIABLE_NAME` in server code
+4. Provide defaults for production safety
+5. Document usage in this file
+6. Set in deployment platform for production
 
 #### Error Handling Implementation
-1. Wrap async operations in try-catch
-2. Return appropriate HTTP status codes
-3. Log errors for debugging
-4. Consider global error middleware
+1. Use `asyncHandler` wrapper for async routes (recommended)
+2. OR wrap async operations in try-catch manually
+3. Return appropriate HTTP status codes
+4. Log errors with context for debugging
+5. Global error middleware catches all unhandled errors
 
 ### File Navigation for AI Agents
 
@@ -399,6 +496,9 @@ export const handler: RequestHandler = async (req, res) => {
 - **Server Setup**: `server/index.ts`
 - **Production Entry**: `server/node-build.ts`
 - **Route Handlers**: `server/routes/`
+- **Middleware**: `server/middleware/`
+- **Configuration**: `server/config/`
+- **Utilities**: `server/utils/`
 - **Build Config**: `vite.config.server.ts`
 
 **Development Patterns**:
