@@ -2,24 +2,150 @@ import { Menu } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ROUTE_PATHS } from "@/routes/paths";
 import { AnimatedThemeToggler } from "@/components/animated-theme-toggler";
+import { useEffect, useState, useRef, RefObject } from "react";
 
-export default function BottomNavigation() {
+interface BottomNavigationProps {
+  footerRef: RefObject<HTMLElement>;
+}
+
+export default function BottomNavigation({ footerRef }: BottomNavigationProps) {
+  const [isVisible, setIsVisible] = useState(true);
+  const [isFooterVisible, setIsFooterVisible] = useState(false);
+  const [mergeProgress, setMergeProgress] = useState(0); // 0 to 1, represents merge animation progress
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const hideTimeoutRef = useRef<number | null>(null);
+
+  // Intersection Observer to detect footer visibility
+  useEffect(() => {
+    if (!footerRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          setIsFooterVisible(entry.isIntersecting);
+        });
+      },
+      {
+        threshold: 0.1, // Trigger when 10% of footer is visible
+        rootMargin: "0px 0px -50px 0px", // Slight offset from bottom
+      }
+    );
+
+    observer.observe(footerRef.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [footerRef]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const scrollDifference = currentScrollY - lastScrollY;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+
+      // Calculate distance to footer
+      const distanceFromBottom = documentHeight - (currentScrollY + windowHeight);
+
+      // Merge zone: start merging when within 300px of footer
+      const mergeZone = 300;
+      const progress = Math.max(0, Math.min(1, 1 - distanceFromBottom / mergeZone));
+      setMergeProgress(progress);
+
+      // Clear any existing hide timeout
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current);
+      }
+
+      // Never show when footer is visible
+      if (isFooterVisible) {
+        setIsVisible(false);
+        return;
+      }
+
+      // Always show at the top of the page
+      if (currentScrollY < 50) {
+        setIsVisible(true);
+      }
+      // Show when scrolling up (not in footer zone)
+      else if (scrollDifference < -10 && !isFooterVisible) {
+        setIsVisible(true);
+        // Auto-hide after 3 seconds of no scrolling
+        hideTimeoutRef.current = window.setTimeout(() => {
+          if (!isFooterVisible) {
+            setIsVisible(false);
+          }
+        }, 3000);
+      }
+      // Hide when scrolling down
+      else if (scrollDifference > 10) {
+        setIsVisible(false);
+      }
+
+      setLastScrollY(currentScrollY);
+    };
+
+    // Show initially, then hide after 3 seconds if not at top
+    hideTimeoutRef.current = window.setTimeout(() => {
+      if (window.scrollY >= 50 && !isFooterVisible) {
+        setIsVisible(false);
+      }
+    }, 3000);
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current);
+      }
+    };
+  }, [lastScrollY, isFooterVisible]);
+
+  // Calculate merge transformation values
+  const scale = 1 + mergeProgress * 0.3; // Scale from 1 to 1.3
+  const borderRadius = 50 - mergeProgress * 50; // From 50px (pill) to 0px (rectangle)
+  const finalOpacity = 1 - mergeProgress * 0.7; // Fade out as merging (keep some opacity for smooth transition)
+  const paddingMultiplier = 1 - mergeProgress; // Reduce padding as merging
+
   return (
-    <div className="mx-2 mt-4 mb-4 sm:mx-4 sm:mt-8 sm:mb-8 lg:mx-8">
-      <div className="relative flex items-center py-6">
+    <div
+      className={`fixed bottom-0 left-0 right-0 z-50 transition-all duration-700 ease-out ${
+        isVisible && !isFooterVisible
+          ? "translate-y-0"
+          : "translate-y-full pointer-events-none"
+      }`}
+      style={{
+        paddingLeft: `${8 * paddingMultiplier}px`,
+        paddingRight: `${8 * paddingMultiplier}px`,
+        paddingBottom: `${16 * paddingMultiplier}px`,
+        opacity: isVisible && !isFooterVisible ? 1 : 0,
+      }}
+    >
+      <div
+        className="relative flex items-center py-4 px-6 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 transition-all duration-700 ease-out origin-bottom"
+        style={{
+          transform: `scale(${scale}) translateZ(0)`,
+          borderRadius: `${borderRadius}px`,
+          opacity: finalOpacity,
+        }}
+      >
         {/* Theme Toggle */}
-        <div className="mr-4">
-          <AnimatedThemeToggler className="w-12 h-12 bg-white dark:bg-gray-800 rounded-full shadow-lg flex items-center justify-center transition-colors" />
+        <div className="mr-3 sm:mr-4">
+          <AnimatedThemeToggler className="w-10 h-10 sm:w-12 sm:h-12 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full flex items-center justify-center transition-colors" />
         </div>
 
         {/* Menu */}
-        <button className="lg:hidden">
-          <Menu className="w-6 h-6 text-gray-900 dark:text-white" />
+        <button className="lg:hidden hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full p-2 transition-colors">
+          <Menu className="w-5 h-5 sm:w-6 sm:h-6 text-gray-900 dark:text-white" />
         </button>
 
         {/* Logo */}
         <div className="absolute left-1/2 transform -translate-x-1/2">
-          <div className="w-40 h-[47px] text-gray-900 dark:text-white">
+          <div className="w-32 h-[38px] sm:w-40 sm:h-[47px] text-gray-900 dark:text-white">
             <svg viewBox="0 0 180 47" fill="none" xmlns="http://www.w3.org/2000/svg">
               <g clipPath="url(#clip0)">
                 <mask id="m0" style={{maskType:'luminance'}} maskUnits="userSpaceOnUse" x="0" y="0" width="180" height="47">
@@ -52,7 +178,7 @@ export default function BottomNavigation() {
         <div className="ml-auto">
           <Link
             to={ROUTE_PATHS.MOBILE_APP}
-            className="bg-revz-red hover:bg-revz-red/90 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-full font-nevera text-xs sm:text-sm uppercase tracking-widest transition-colors inline-block"
+            className="bg-revz-red hover:bg-revz-red/90 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-full font-nevera text-xs sm:text-sm uppercase tracking-widest transition-all hover:scale-105 active:scale-95 inline-block shadow-lg"
           >
             Download App
           </Link>
