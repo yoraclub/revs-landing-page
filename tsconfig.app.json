@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    /* Path aliases for IDE/editor support only */
+    /* Vite handles actual resolution at build time */
+    "composite": true,
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./client/*"],
+      "@shared/*": ["./shared/*"]
+    }
+  }
+}

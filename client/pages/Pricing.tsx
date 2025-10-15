@@ -306,7 +306,7 @@ export default function Pricing() {
             {comparisonFeatures.map((category, categoryIndex) => (
               <div key={categoryIndex}>
                 <div className="grid grid-cols-4 border-b bg-muted/20">
-                  <div className="p-4 font-medium text-sm uppercase tracking-wide text-muted-foreground" colSpan={4}>
+                  <div className="p-4 font-medium text-sm uppercase tracking-wide text-muted-foreground">
                     {category.category}
                   </div>
                   <div></div>
