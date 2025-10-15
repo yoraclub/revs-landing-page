@@ -1,6 +1,7 @@
 import { ReactNode, useRef } from "react";
 import BottomNavigation from "./BottomNavigation";
 import Footer from "./Footer";
+import { LayoutGroup } from "framer-motion";
 
 interface LayoutProps {
   children: ReactNode;
@@ -14,11 +15,14 @@ export default function Layout({ children }: LayoutProps) {
       {/* Main content */}
       <main className="flex-1">{children}</main>
 
-      {/* Footer - part of page layout */}
-      <Footer ref={footerRef} />
+      {/* Wrap footer and nav in LayoutGroup for synchronized morphing */}
+      <LayoutGroup>
+        {/* Footer - part of page layout */}
+        <Footer ref={footerRef} />
 
-      {/* Floating Bottom Navigation - appears when scrolling */}
-      <BottomNavigation footerRef={footerRef} />
+        {/* Floating Bottom Navigation - appears when scrolling */}
+        <BottomNavigation footerRef={footerRef} />
+      </LayoutGroup>
     </div>
   );
 }

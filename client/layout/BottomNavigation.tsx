@@ -3,16 +3,18 @@ import { Link } from "react-router-dom";
 import { ROUTE_PATHS } from "@/routes/paths";
 import { AnimatedThemeToggler } from "@/components/animated-theme-toggler";
 import { useEffect, useState, useRef, RefObject } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface BottomNavigationProps {
   footerRef: RefObject<HTMLElement>;
 }
 
 export default function BottomNavigation({ footerRef }: BottomNavigationProps) {
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
   const [isFooterVisible, setIsFooterVisible] = useState(false);
-  const [mergeProgress, setMergeProgress] = useState(0); // 0 to 1, represents merge animation progress
+  const [shouldMerge, setShouldMerge] = useState(false); // Simple boolean for merge state
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [isScrollingUp, setIsScrollingUp] = useState(false);
   const hideTimeoutRef = useRef<number | null>(null);
 
   // Intersection Observer to detect footer visibility
@@ -22,12 +24,24 @@ export default function BottomNavigation({ footerRef }: BottomNavigationProps) {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          setIsFooterVisible(entry.isIntersecting);
+          const footerVisible = entry.isIntersecting && entry.intersectionRatio > 0;
+          setIsFooterVisible(footerVisible);
+
+          // Trigger merge animation when footer starts becoming visible
+          if (footerVisible && entry.intersectionRatio < 0.5) {
+            setShouldMerge(true);
+          } else if (entry.intersectionRatio >= 0.5) {
+            // Hide nav completely when footer is more than 50% visible
+            setShouldMerge(false);
+          } else {
+            // Footer not visible, no merge
+            setShouldMerge(false);
+          }
         });
       },
       {
-        threshold: 0.1, // Trigger when 10% of footer is visible
-        rootMargin: "0px 0px -50px 0px", // Slight offset from bottom
+        threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
+        rootMargin: "0px 0px -100px 0px", // Start detecting 100px before footer enters viewport
       }
     );
 
@@ -42,59 +56,64 @@ export default function BottomNavigation({ footerRef }: BottomNavigationProps) {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       const scrollDifference = currentScrollY - lastScrollY;
-      const windowHeight = window.innerHeight;
-      const documentHeight = document.documentElement.scrollHeight;
 
-      // Calculate distance to footer
-      const distanceFromBottom = documentHeight - (currentScrollY + windowHeight);
+      // Track scroll direction
+      const scrollingUp = scrollDifference < -5;
+      const scrollingDown = scrollDifference > 5;
 
-      // Merge zone: start merging when within 300px of footer
-      const mergeZone = 300;
-      const progress = Math.max(0, Math.min(1, 1 - distanceFromBottom / mergeZone));
-      setMergeProgress(progress);
+      if (scrollingUp) {
+        setIsScrollingUp(true);
+      } else if (scrollingDown) {
+        setIsScrollingUp(false);
+      }
 
       // Clear any existing hide timeout
       if (hideTimeoutRef.current) {
         clearTimeout(hideTimeoutRef.current);
       }
 
-      // Never show when footer is visible
-      if (isFooterVisible) {
-        setIsVisible(false);
-        return;
-      }
+      // Determine visibility based on conditions
+      let shouldBeVisible = false;
 
-      // Always show at the top of the page
-      if (currentScrollY < 50) {
-        setIsVisible(true);
+      // Rule 1: Show when merge animation is active (footer becoming visible)
+      if (shouldMerge) {
+        shouldBeVisible = true;
       }
-      // Show when scrolling up (not in footer zone)
-      else if (scrollDifference < -10 && !isFooterVisible) {
-        setIsVisible(true);
+      // Rule 2: Hide when footer is more than 50% visible
+      else if (isFooterVisible) {
+        shouldBeVisible = false;
+      }
+      // Rule 3: Show at top of page
+      else if (currentScrollY < 50) {
+        shouldBeVisible = true;
+      }
+      // Rule 4: Show when scrolling up, hide when scrolling down
+      else if (scrollingUp) {
+        shouldBeVisible = true;
         // Auto-hide after 3 seconds of no scrolling
         hideTimeoutRef.current = window.setTimeout(() => {
-          if (!isFooterVisible) {
+          if (window.scrollY >= 50 && !shouldMerge && !isFooterVisible) {
             setIsVisible(false);
           }
         }, 3000);
       }
-      // Hide when scrolling down
-      else if (scrollDifference > 10) {
-        setIsVisible(false);
+      else if (scrollingDown) {
+        shouldBeVisible = false;
+      }
+      else {
+        // Not scrolling - keep current state unless at top
+        shouldBeVisible = currentScrollY < 50 ? true : isVisible;
       }
 
+      setIsVisible(shouldBeVisible);
       setLastScrollY(currentScrollY);
     };
 
-    // Show initially, then hide after 3 seconds if not at top
-    hideTimeoutRef.current = window.setTimeout(() => {
-      if (window.scrollY >= 50 && !isFooterVisible) {
-        setIsVisible(false);
-      }
-    }, 3000);
-
     window.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("resize", handleScroll, { passive: true });
+
+    // Run once on mount to set initial state
+    handleScroll();
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
@@ -103,36 +122,39 @@ export default function BottomNavigation({ footerRef }: BottomNavigationProps) {
         clearTimeout(hideTimeoutRef.current);
       }
     };
-  }, [lastScrollY, isFooterVisible]);
+  }, [lastScrollY, isFooterVisible, shouldMerge, isVisible]);
 
-  // Calculate merge transformation values
-  const scale = 1 + mergeProgress * 0.3; // Scale from 1 to 1.3
-  const borderRadius = 50 - mergeProgress * 50; // From 50px (pill) to 0px (rectangle)
-  const finalOpacity = 1 - mergeProgress * 0.7; // Fade out as merging (keep some opacity for smooth transition)
-  const paddingMultiplier = 1 - mergeProgress; // Reduce padding as merging
 
   return (
-    <div
-      className={`fixed bottom-0 left-0 right-0 z-50 transition-all duration-700 ease-out ${
-        isVisible && !isFooterVisible
-          ? "translate-y-0"
-          : "translate-y-full pointer-events-none"
-      }`}
-      style={{
-        paddingLeft: `${8 * paddingMultiplier}px`,
-        paddingRight: `${8 * paddingMultiplier}px`,
-        paddingBottom: `${16 * paddingMultiplier}px`,
-        opacity: isVisible && !isFooterVisible ? 1 : 0,
-      }}
-    >
-      <div
-        className="relative flex items-center py-4 px-6 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 transition-all duration-700 ease-out origin-bottom"
-        style={{
-          transform: `scale(${scale}) translateZ(0)`,
-          borderRadius: `${borderRadius}px`,
-          opacity: finalOpacity,
-        }}
-      >
+    <AnimatePresence mode="wait">
+      {isVisible && !isFooterVisible && (
+        <motion.div
+          key="bottom-nav"
+          initial={{ y: 100, opacity: 0 }}
+          animate={{
+            y: 0,
+            opacity: 1,
+          }}
+          exit={{
+            y: shouldMerge ? 0 : 100,
+            opacity: 0,
+            transition: { duration: shouldMerge ? 1.0 : 0.3, ease: [0.25, 0.46, 0.45, 0.94] }
+          }}
+          className="fixed bottom-0 left-0 right-0 z-50 px-2 pb-4 sm:px-4 sm:pb-6 lg:px-8 lg:pb-8"
+        >
+          <motion.div
+            layout={shouldMerge}
+            animate={{
+              scale: shouldMerge ? 1.3 : 1,
+              opacity: shouldMerge ? 0.3 : 1,
+            }}
+            transition={{
+              layout: shouldMerge ? { duration: 1.5, ease: [0.22, 1, 0.36, 1] } : { duration: 0 },
+              scale: { duration: 1.5, ease: [0.22, 1, 0.36, 1] },
+              opacity: { duration: 1.5, ease: [0.22, 1, 0.36, 1] },
+            }}
+            className="relative flex items-center py-4 px-6 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 rounded-full"
+          >
         {/* Theme Toggle */}
         <div className="mr-3 sm:mr-4">
           <AnimatedThemeToggler className="w-10 h-10 sm:w-12 sm:h-12 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full flex items-center justify-center transition-colors" />
@@ -145,7 +167,16 @@ export default function BottomNavigation({ footerRef }: BottomNavigationProps) {
 
         {/* Logo */}
         <div className="absolute left-1/2 transform -translate-x-1/2">
-          <div className="w-32 h-[38px] sm:w-40 sm:h-[47px] text-gray-900 dark:text-white">
+          <motion.div
+            {...(shouldMerge && { layoutId: "nav-logo" })}
+            layout={shouldMerge}
+            transition={shouldMerge ? {
+              duration: 1.5,
+              ease: [0.22, 1, 0.36, 1],
+              delay: 0.1
+            } : { duration: 0 }}
+          >
+            <div className="w-32 h-[38px] sm:w-40 sm:h-[47px] text-gray-900 dark:text-white">
             <svg viewBox="0 0 180 47" fill="none" xmlns="http://www.w3.org/2000/svg">
               <g clipPath="url(#clip0)">
                 <mask id="m0" style={{maskType:'luminance'}} maskUnits="userSpaceOnUse" x="0" y="0" width="180" height="47">
@@ -171,19 +202,32 @@ export default function BottomNavigation({ footerRef }: BottomNavigationProps) {
                 </clipPath>
               </defs>
             </svg>
-          </div>
+            </div>
+          </motion.div>
         </div>
 
         {/* Download Button */}
         <div className="ml-auto">
+          <motion.div
+            {...(shouldMerge && { layoutId: "nav-download-btn" })}
+            layout={shouldMerge}
+            transition={shouldMerge ? {
+              duration: 1.5,
+              ease: [0.22, 1, 0.36, 1],
+              delay: 0.05
+            } : { duration: 0 }}
+          >
           <Link
             to={ROUTE_PATHS.MOBILE_APP}
             className="bg-revz-red hover:bg-revz-red/90 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-full font-nevera text-xs sm:text-sm uppercase tracking-widest transition-all hover:scale-105 active:scale-95 inline-block shadow-lg"
           >
             Download App
           </Link>
+          </motion.div>
         </div>
-      </div>
-    </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
