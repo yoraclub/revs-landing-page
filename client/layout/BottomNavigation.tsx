@@ -127,7 +127,8 @@ export default function BottomNavigation({ footerRef }: BottomNavigationProps) {
 
   return (
     <AnimatePresence mode="wait">
-      {isVisible && !isFooterVisible && (
+      {/* {isVisible && (!isFooterVisible || shouldMerge) && ( */}
+      {isVisible && (!isFooterVisible) && (
         <motion.div
           key="bottom-nav"
           initial={{ y: 100, opacity: 0 }}
