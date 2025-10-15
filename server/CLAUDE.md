@@ -14,7 +14,10 @@ server/
 │   ├── cors.ts           # CORS configuration with env variables
 │   └── express.ts        # Express middleware config (body limits)
 ├── middleware/            # Express middleware
-│   └── errorHandler.ts   # Global error handling + async wrapper
+│   ├── errorHandler.ts   # Global error handling + async wrapper
+│   ├── logger.ts         # Request logging with Morgan
+│   ├── compression.ts    # Response compression with gzip
+│   └── rateLimit.ts      # Rate limiting for API routes
 ├── utils/                 # Utility functions
 │   └── shutdown.ts       # Graceful shutdown handler
 └── routes/                # API route handlers
@@ -29,10 +32,13 @@ server/
 ```typescript
 Server Configuration:
 ├── Express App Instance
-├── Middleware Stack
+├── Middleware Stack (in order)
+│   ├── logger                        # Request logging (Morgan)
+│   ├── compressionMiddleware         # Response compression (gzip)
 │   ├── cors(corsConfig)              # Cross-origin requests (environment-based)
 │   ├── express.json({ limit: 10mb }) # JSON body parsing with size limit
-│   └── express.urlencoded()          # Form data parsing with size limit
+│   ├── express.urlencoded()          # Form data parsing with size limit
+│   └── apiLimiter                    # Rate limiting for /api/* routes
 ├── API Routes
 │   ├── GET /api/ping                # Health check endpoint
 │   └── GET /api/hello               # Example API endpoint
@@ -42,7 +48,46 @@ Server Configuration:
 
 ### Middleware Stack Details
 
-1. **CORS (Cross-Origin Resource Sharing)**
+**Middleware Order**: The order of middleware is critical for proper functioning. They are applied in this sequence:
+
+1. **Request Logger** (Morgan)
+   - **Location**: `server/middleware/logger.ts`
+   - **Purpose**: Logs incoming HTTP requests
+   - **Configuration**:
+     - Development: 'dev' format (colored, concise, logs all requests)
+     - Production: Custom clean format with colored status codes
+   - **Smart Filtering**:
+     - Skips static assets in production (CSS, JS, images, fonts)
+     - Only logs API routes and page requests
+     - Reduces log noise by ~80%
+   - **Format**: `METHOD URL STATUS TIME - SIZE`
+   - **Example**: `GET /api/hello 200 12.3 ms - 45`
+   - **Benefits**: Clean, readable logs without clutter
+   - **Position**: First middleware to capture all requests
+
+2. **Response Compression**
+   - **Location**: `server/middleware/compression.ts`
+   - **Purpose**: Compresses response bodies using gzip
+   - **Configuration**:
+     - Threshold: 1KB (only compress responses larger than 1KB)
+     - Level: 6 (balanced compression ratio)
+     - Filter: Respects `x-no-compression` header
+   - **Benefits**: Reduces bandwidth usage, faster response times
+   - **Position**: Early in stack to compress all responses
+
+3. **Rate Limiting**
+   - **Location**: `server/middleware/rateLimit.ts`
+   - **Purpose**: Prevents API abuse by limiting requests per IP
+   - **Configurations**:
+     - `apiLimiter`: 100 requests per 15 minutes for /api/* routes
+     - `strictLimiter`: 5 requests per 15 minutes for sensitive endpoints
+   - **Features**:
+     - Automatic headers (`RateLimit-*`)
+     - JSON error responses
+     - Disabled in development mode
+   - **Benefits**: Protects against DoS attacks, prevents abuse
+
+4. **CORS (Cross-Origin Resource Sharing)**
    - **Location**: `server/config/cors.ts`
    - **Purpose**: Enables frontend-backend communication
    - **Configuration**: Environment-based via `ALLOWED_ORIGINS`
@@ -50,21 +95,21 @@ Server Configuration:
    - **Allowed Methods**: GET, POST, PUT, DELETE, PATCH, OPTIONS
    - **Credentials**: Enabled for cookie support
 
-2. **Express JSON Parser**
+5. **Express JSON Parser**
    - **Location**: `server/config/express.ts`
    - **Purpose**: Parses incoming JSON request bodies
    - **Configuration**: `express.json({ limit: "10mb" })`
    - **Usage**: Available as `req.body` in route handlers
    - **Security**: 10MB limit prevents DoS attacks
 
-3. **Express URL-Encoded Parser**
+6. **Express URL-Encoded Parser**
    - **Location**: `server/config/express.ts`
    - **Purpose**: Parses form-encoded request bodies
    - **Configuration**: `express.urlencoded({ extended: true, limit: "10mb" })`
    - **Usage**: Supports nested objects in form data
    - **Security**: 10MB limit prevents DoS attacks
 
-4. **Global Error Handler**
+7. **Global Error Handler**
    - **Location**: `server/middleware/errorHandler.ts`
    - **Purpose**: Catches all unhandled errors and returns JSON responses
    - **Position**: Must be registered last in middleware stack
@@ -210,7 +255,7 @@ Vite Server Build Configuration:
 
 **Current Usage**:
 - `PORT`: Server port (default: 3000)
-- `NODE_ENV`: Runtime environment ("development" or "production")
+- `NODE_ENV`: Runtime environment (automatically managed by Vite - do NOT set in .env)
 - `ALLOWED_ORIGINS`: Comma-separated list of allowed CORS origins (defaults to "*")
 - `PING_MESSAGE`: Custom message for health check endpoint (defaults to "ping")
 
@@ -243,12 +288,40 @@ process.env.VARIABLE_NAME
 ```bash
 # .env file
 PORT=3000
-NODE_ENV=development
+# NODE_ENV is managed by Vite (don't set it here)
 ALLOWED_ORIGINS=http://localhost:8080,http://localhost:3000
 PING_MESSAGE=pong
 ```
 
+**Important Note**:
+- `NODE_ENV` is automatically set by Vite based on the command:
+  - `npm run dev` → `NODE_ENV=development`
+  - `npm run build` → `NODE_ENV=production`
+- Do NOT set `NODE_ENV` in `.env` files as Vite will show a warning
+
 ## API Development Patterns
+
+### Rate Limiting Usage
+
+**Applying Rate Limits to Specific Routes**:
+
+```typescript
+// server/index.ts
+import { apiLimiter, strictLimiter } from "./middleware/rateLimit";
+
+// General API rate limiting (applied globally to /api/*)
+app.use("/api/", apiLimiter);
+
+// Strict rate limiting for sensitive endpoints
+app.post("/api/auth/login", strictLimiter, handleLogin);
+app.post("/api/auth/register", strictLimiter, handleRegister);
+app.post("/api/auth/reset-password", strictLimiter, handlePasswordReset);
+```
+
+**Rate Limiter Options**:
+- `apiLimiter`: 100 requests per 15 minutes (general API usage)
+- `strictLimiter`: 5 requests per 15 minutes (authentication, sensitive operations)
+- Both are disabled in development mode for easier testing
 
 ### Adding New API Endpoints
 
@@ -263,14 +336,29 @@ PING_MESSAGE=pong
    ```typescript
    // server/routes/new-endpoint.ts
    import { RequestHandler } from "express";
-   
+
    export const handleNewEndpoint: RequestHandler = (req, res) => {
      // Implementation
    };
-   
+
    // server/index.ts
    import { handleNewEndpoint } from "./routes/new-endpoint";
    app.get("/api/new-endpoint", handleNewEndpoint);
+   ```
+
+3. **Sensitive Endpoint** (with strict rate limiting):
+   ```typescript
+   // server/routes/auth.ts
+   import { RequestHandler } from "express";
+
+   export const handleLogin: RequestHandler = (req, res) => {
+     // Login implementation
+   };
+
+   // server/index.ts
+   import { handleLogin } from "./routes/auth";
+   import { strictLimiter } from "./middleware/rateLimit";
+   app.post("/api/auth/login", strictLimiter, handleLogin);
    ```
 
 ### Type Safety with Shared Types
@@ -451,7 +539,17 @@ export const handler: RequestHandler = async (req, res) => {
 **Runtime Performance**:
 - Express.js minimal overhead
 - Static file serving with Express built-ins
-- No unnecessary middleware or processing
+- Response compression reduces bandwidth (up to 70% smaller payloads)
+- Efficient middleware order minimizes processing overhead
+- Rate limiting prevents resource exhaustion
+
+**Monitoring & Logging**:
+- Morgan logging for request tracking
+- Smart log filtering (skips static assets in production)
+- Colored status codes for quick issue identification
+- Structured error logging with context
+- Response time tracking in logs
+- Clean, readable log format
 
 ### Scaling Considerations
 
