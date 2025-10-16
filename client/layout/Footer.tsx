@@ -1,28 +1,17 @@
 import { Link } from "react-router-dom";
 import { ROUTE_PATHS } from "@/routes/paths";
 import { AnimatedThemeToggler } from "@/components/animated-theme-toggler";
-import { forwardRef } from "react";
-import { motion } from "framer-motion";
 
-interface FooterProps {}
-
-const Footer = forwardRef<HTMLElement, FooterProps>((props, ref) => {
+export default function Footer() {
   return (
-    <footer
-      ref={ref}
-      className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-t border-gray-200/50 dark:border-gray-700/50"
+    <footer className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-t border-gray-200/50 dark:border-gray-700/50"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 py-12">
+      <div className="mx-auto px-4 sm:px-8 lg:px-16 py-12">
         <div className="space-y-8">
           {/* Top Section - Logo and CTA */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pb-8 border-b border-gray-200/50 dark:border-gray-700/50">
             <div className="flex items-center gap-4">
-              <motion.div
-                layoutId="nav-logo"
-                layout
-                transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
-              >
-                <div className="w-48 h-[56px] text-gray-900 dark:text-white">
+              <div className="w-48 h-[56px] text-gray-900 dark:text-white">
                 <svg viewBox="0 0 180 47" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <g clipPath="url(#clip0)">
                     <mask id="m0" style={{maskType:'luminance'}} maskUnits="userSpaceOnUse" x="0" y="0" width="180" height="47">
@@ -48,21 +37,14 @@ const Footer = forwardRef<HTMLElement, FooterProps>((props, ref) => {
                     </clipPath>
                   </defs>
                 </svg>
-                </div>
-              </motion.div>
+              </div>
             </div>
-            <motion.div
-              layoutId="nav-download-btn"
-              layout
-              transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1], delay: 0.05 }}
+            <Link
+              to={ROUTE_PATHS.MOBILE_APP}
+              className="bg-revz-red hover:bg-revz-red/90 text-white px-8 py-4 rounded-full font-nevera text-sm uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-lg"
             >
-              <Link
-                to={ROUTE_PATHS.MOBILE_APP}
-                className="bg-revz-red hover:bg-revz-red/90 text-white px-8 py-4 rounded-full font-nevera text-sm uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-lg"
-              >
-                Download App
-              </Link>
-            </motion.div>
+              Download App
+            </Link>
           </div>
 
           {/* Middle Section - Links and Info */}
@@ -118,8 +100,4 @@ const Footer = forwardRef<HTMLElement, FooterProps>((props, ref) => {
       </div>
     </footer>
   );
-});
-
-Footer.displayName = "Footer";
-
-export default Footer;
+}
