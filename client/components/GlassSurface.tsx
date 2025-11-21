@@ -202,7 +202,10 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
       height: typeof height === 'number' ? `${height}px` : height,
       borderRadius: `${borderRadius}px`,
       '--glass-frost': backgroundOpacity,
-      '--glass-saturation': saturation
+      '--glass-saturation': saturation,
+      // Safari fix: ensure proper stacking context for backdrop-filter
+      isolation: 'isolate',
+      transform: 'translateZ(0)',
     } as React.CSSProperties;
 
     if (svgFiltersSupported) {
@@ -241,9 +244,11 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
         } else {
           return {
             ...baseStyles,
-            background: 'rgba(255, 255, 255, 0.1)',
-            backdropFilter: 'blur(12px) saturate(1.8) brightness(1.2)',
-            WebkitBackdropFilter: 'blur(12px) saturate(1.8) brightness(1.2)',
+            // Safari 18 fix: separate background from backdrop-filter can cause issues
+            // Using transparent background with stronger blur
+            background: 'transparent',
+            backdropFilter: 'blur(16px) saturate(1.8) brightness(1.15)',
+            WebkitBackdropFilter: 'blur(16px) saturate(1.8) brightness(1.15)',
             border: '1px solid rgba(255, 255, 255, 0.2)',
             boxShadow: `inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
                         inset 0 -1px 0 0 rgba(255, 255, 255, 0.1)`
@@ -261,9 +266,10 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
         } else {
           return {
             ...baseStyles,
-            background: 'rgba(255, 255, 255, 0.25)',
-            backdropFilter: 'blur(12px) saturate(1.8) brightness(1.1)',
-            WebkitBackdropFilter: 'blur(12px) saturate(1.8) brightness(1.1)',
+            // Safari 18 fix: separate background from backdrop-filter can cause issues
+            background: 'transparent',
+            backdropFilter: 'blur(16px) saturate(1.8) brightness(1.05)',
+            WebkitBackdropFilter: 'blur(16px) saturate(1.8) brightness(1.05)',
             border: '1px solid rgba(255, 255, 255, 0.3)',
             boxShadow: `0 8px 32px 0 rgba(31, 38, 135, 0.2),
                         0 2px 16px 0 rgba(31, 38, 135, 0.1),
