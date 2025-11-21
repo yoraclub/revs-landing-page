@@ -9,37 +9,46 @@ import { useResponsive } from "@/hooks/use-mobile";
 const ComingSoon = () => {
   const [mounted, setMounted] = useState(false);
   const [arrowClicked, setArrowClicked] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [viewportHeight, setViewportHeight] = useState(0);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const lenisRef = useRef<Lenis | null>(null);
+  const section1Ref = useRef<HTMLDivElement>(null);
+  const section2Ref = useRef<HTMLDivElement>(null);
+  const section3Ref = useRef<HTMLDivElement>(null);
   const { isMobile, isTablet, device } = useResponsive();
 
   const handleScrollDown = () => {
-    if (lenisRef.current) {
-      lenisRef.current.scrollTo(window.innerHeight);
+    if (lenisRef.current && section2Ref.current) {
+      lenisRef.current.scrollTo(section2Ref.current.offsetTop);
       setArrowClicked(true);
     }
   };
 
   useEffect(() => {
+    setViewportHeight(window.innerHeight);
     setMounted(true);
   }, []);
 
   useEffect(() => {
-    if (!mounted || !containerRef.current) return;
+    if (!mounted || !wrapperRef.current || !contentRef.current) return;
 
-    const container = containerRef.current;
+    const wrapper = wrapperRef.current;
+    const content = contentRef.current;
     const viewportHeight = window.innerHeight;
 
     // Initialize Lenis with responsive settings
     const lenis = new Lenis({
-      wrapper: container,
-      content: container,
-      duration: isMobile ? 1.5 : isTablet ? 1.8 : 2,
+      wrapper: wrapper,
+      content: content,
+      duration: isMobile ? 1.2 : isTablet ? 1.5 : 2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: "vertical",
       smoothWheel: true,
       wheelMultiplier: isMobile ? 1.2 : 0.8,
-      touchMultiplier: isMobile ? 1.5 : isTablet ? 1.2 : 0.8,
+      touchMultiplier: isMobile ? 2 : isTablet ? 1.5 : 1,
+      syncTouch: true,
+      syncTouchLerp: isMobile ? 0.1 : 0.075,
     });
     lenisRef.current = lenis;
 
@@ -57,13 +66,14 @@ const ComingSoon = () => {
 
     // Initialize Snap with Lenis
     const snap = new Snap(lenis, {
-      type: "mandatory",
+      type: "proximity",
+      debounce: isMobile ? 100 : 50,
     });
 
-    // Add snap points for each section
-    snap.add(0);
-    snap.add(viewportHeight);
-    snap.add(viewportHeight * 2);
+    // Add snap points using actual DOM positions
+    if (section1Ref.current) snap.add(section1Ref.current.offsetTop);
+    if (section2Ref.current) snap.add(section2Ref.current.offsetTop);
+    if (section3Ref.current) snap.add(section3Ref.current.offsetTop);
 
     function raf(time: number) {
       lenis.raf(time);
@@ -82,15 +92,23 @@ const ComingSoon = () => {
   if (!mounted) return null;
 
   return (
-    <div ref={containerRef} className="h-screen overflow-y-auto bg-background">
-      {/* Background gradient */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-revz-red/5 rounded-full blur-3xl" />
-      </div>
+    <div ref={wrapperRef} className="overflow-y-auto bg-background" style={{ height: viewportHeight }}>
+      <div ref={contentRef}>
+        {/* Background gradient */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-revz-red/5 rounded-full blur-3xl" />
+        </div>
 
-      <LogoSection arrowClicked={arrowClicked} onScrollDown={handleScrollDown} isMobile={isMobile} isTablet={isTablet} />
-      <TeaseSection isMobile={isMobile} />
-      <EmailSignupSection isMobile={isMobile} isTablet={isTablet} />
+        <div ref={section1Ref}>
+          <LogoSection arrowClicked={arrowClicked} onScrollDown={handleScrollDown} isMobile={isMobile} isTablet={isTablet} height={viewportHeight} />
+        </div>
+        <div ref={section2Ref}>
+          <TeaseSection isMobile={isMobile} height={viewportHeight} />
+        </div>
+        <div ref={section3Ref}>
+          <EmailSignupSection isMobile={isMobile} isTablet={isTablet} height={viewportHeight} />
+        </div>
+      </div>
     </div>
   );
 };
