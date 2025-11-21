@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { motion } from "framer-motion";
-import GlassSurface from "@/components/GlassSurface";
 
 const Plasma = lazy(() => import("@/components/Plasma").then(m => ({ default: m.Plasma })));
+const GlassSurface = lazy(() => import("@/components/GlassSurface"));
 
 interface EmailSignupSectionProps {
   isMobile: boolean;
@@ -65,12 +65,14 @@ const EmailSignupSection = ({ isMobile, isTablet, height }: EmailSignupSectionPr
           </Suspense>
         )}
       </div>
-      <GlassSurface
-        width="100%"
-        height="auto"
-        borderRadius={isMobile ? 24 : 32}
-        className={`w-full relative z-10 ${isMobile ? 'max-w-sm' : isTablet ? 'max-w-md' : 'max-w-lg'}`}
-      >
+      {isVisible && (
+        <Suspense fallback={null}>
+          <GlassSurface
+            width="100%"
+            height="auto"
+            borderRadius={isMobile ? 24 : 32}
+            className={`w-full relative z-10 ${isMobile ? 'max-w-sm' : isTablet ? 'max-w-md' : 'max-w-lg'}`}
+          >
         <motion.div
           initial={{ opacity: 0, y: 80 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -219,7 +221,9 @@ const EmailSignupSection = ({ isMobile, isTablet, height }: EmailSignupSectionPr
             </motion.form>
           )}
         </motion.div>
-      </GlassSurface>
+          </GlassSurface>
+        </Suspense>
+      )}
     </section>
   );
 };
