@@ -12,8 +12,8 @@ interface LogoSectionProps {
 
 const LogoSection = ({ arrowClicked, onScrollDown, isMobile, isTablet }: LogoSectionProps) => {
   return (
-    <section className={`h-screen flex flex-col items-center justify-start relative ${isMobile ? 'pt-24 px-4' : isTablet ? 'pt-28 px-5' : 'pt-34 px-6'}`}>
-      <div className="absolute inset-0">
+    <section className={`h-screen flex flex-col items-center justify-start relative overflow-hidden ${isMobile ? 'pt-24 px-4' : isTablet ? 'pt-28 px-5' : 'pt-34 px-6'}`}>
+      <div className="absolute inset-0 overflow-hidden [&_canvas]:w-full! [&_canvas]:h-full! [&_canvas]:max-w-full! [&_canvas]:max-h-full!">
         <HyperSpeed effectOptions={hyperspeedPresets.two as any} />
       </div>
       <motion.div

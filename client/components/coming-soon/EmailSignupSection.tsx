@@ -24,8 +24,8 @@ const EmailSignupSection = ({ isMobile, isTablet }: EmailSignupSectionProps) => 
   };
 
   return (
-    <section className={`h-screen flex flex-col items-center justify-center relative ${isMobile ? 'px-4' : 'px-6'}`}>
-      <div className="absolute inset-0">
+    <section className={`h-screen flex flex-col items-center justify-center relative overflow-hidden ${isMobile ? 'px-4' : 'px-6'}`}>
+      <div className="absolute inset-0 overflow-hidden [&_canvas]:w-full! [&_canvas]:h-full! [&_canvas]:max-w-full! [&_canvas]:max-h-full!">
         <Plasma
           color="#FF1801"
           speed={1}
