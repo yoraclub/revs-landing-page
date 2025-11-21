@@ -4,12 +4,14 @@ import TeaseSection from "@/components/coming-soon/TeaseSection";
 import EmailSignupSection from "@/components/coming-soon/EmailSignupSection";
 import Lenis from "lenis";
 import Snap from "lenis/snap";
+import { useResponsive } from "@/hooks/use-mobile";
 
 const ComingSoon = () => {
   const [mounted, setMounted] = useState(false);
   const [arrowClicked, setArrowClicked] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const lenisRef = useRef<Lenis | null>(null);
+  const { isMobile, isTablet, device } = useResponsive();
 
   const handleScrollDown = () => {
     if (lenisRef.current) {
@@ -28,16 +30,16 @@ const ComingSoon = () => {
     const container = containerRef.current;
     const viewportHeight = window.innerHeight;
 
-    // Initialize Lenis for ultra-smooth, slow scrolling
+    // Initialize Lenis with responsive settings
     const lenis = new Lenis({
       wrapper: container,
       content: container,
-      duration: 2,
+      duration: isMobile ? 1.5 : isTablet ? 1.8 : 2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: "vertical",
       smoothWheel: true,
-      wheelMultiplier: 0.8,
-      touchMultiplier: 0.8,
+      wheelMultiplier: isMobile ? 1.2 : 0.8,
+      touchMultiplier: isMobile ? 1.5 : isTablet ? 1.2 : 0.8,
     });
     lenisRef.current = lenis;
 
@@ -75,7 +77,7 @@ const ComingSoon = () => {
       lenis.destroy();
       lenisRef.current = null;
     };
-  }, [mounted]);
+  }, [mounted, isMobile, isTablet]);
 
   if (!mounted) return null;
 
@@ -86,9 +88,9 @@ const ComingSoon = () => {
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-revz-red/5 rounded-full blur-3xl" />
       </div>
 
-      <LogoSection arrowClicked={arrowClicked} onScrollDown={handleScrollDown} />
-      <TeaseSection />
-      <EmailSignupSection />
+      <LogoSection arrowClicked={arrowClicked} onScrollDown={handleScrollDown} isMobile={isMobile} isTablet={isTablet} />
+      <TeaseSection isMobile={isMobile} />
+      <EmailSignupSection isMobile={isMobile} isTablet={isTablet} />
     </div>
   );
 };

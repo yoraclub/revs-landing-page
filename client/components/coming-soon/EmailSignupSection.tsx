@@ -3,7 +3,12 @@ import { motion } from "framer-motion";
 import GlassSurface from "@/components/GlassSurface";
 import { Plasma } from "@/components/Plasma";
 
-const EmailSignupSection = () => {
+interface EmailSignupSectionProps {
+  isMobile: boolean;
+  isTablet: boolean;
+}
+
+const EmailSignupSection = ({ isMobile, isTablet }: EmailSignupSectionProps) => {
   const [email, setEmail] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -19,23 +24,22 @@ const EmailSignupSection = () => {
   };
 
   return (
-    <section className="h-screen flex flex-col items-center justify-center px-6 relative">
+    <section className={`h-screen flex flex-col items-center justify-center relative ${isMobile ? 'px-4' : 'px-6'}`}>
       <div className="absolute inset-0">
         <Plasma
           color="#FF1801"
           speed={1}
           direction="pingpong"
-          scale={1}
+          scale={isMobile ? 0.8 : 1}
           opacity={0.6}
-          mouseInteractive={true}
+          mouseInteractive={!isMobile}
         />
       </div>
       <GlassSurface
         width="100%"
         height="auto"
-        borderRadius={32}
-        // backgroundOpacity={0.6}
-        className="max-w-lg w-full relative z-10"
+        borderRadius={isMobile ? 24 : 32}
+        className={`w-full relative z-10 ${isMobile ? 'max-w-sm' : isTablet ? 'max-w-md' : 'max-w-lg'}`}
       >
         <motion.div
           initial={{ opacity: 0, y: 80 }}
@@ -45,7 +49,7 @@ const EmailSignupSection = () => {
             duration: 1.4,
             ease: [0.16, 1, 0.3, 1]
           }}
-          className="relative z-10 text-center w-full p-10 sm:p-12"
+          className={`relative z-10 text-center w-full ${isMobile ? 'p-6' : isTablet ? 'p-8' : 'p-10 sm:p-12'}`}
         >
           {/* Decorative top accent */}
           <motion.div
@@ -53,7 +57,7 @@ const EmailSignupSection = () => {
             whileInView={{ scaleX: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="w-16 h-1 bg-linear-to-r from-revz-red to-red-400 mx-auto mb-8 rounded-full"
+            className={`h-1 bg-linear-to-r from-revz-red to-red-400 mx-auto rounded-full ${isMobile ? 'w-12 mb-6' : 'w-16 mb-8'}`}
           />
 
           <motion.h2
@@ -65,7 +69,7 @@ const EmailSignupSection = () => {
               delay: 0.2,
               ease: [0.16, 1, 0.3, 1]
             }}
-            className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 font-orbitron tracking-tight"
+            className={`font-bold font-orbitron tracking-tight ${isMobile ? 'text-2xl mb-3' : 'text-3xl sm:text-4xl lg:text-5xl mb-4'}`}
           >
             Stay in the{" "}
             <span className="text-transparent bg-clip-text bg-linear-to-r from-revz-red to-red-400">
@@ -82,7 +86,7 @@ const EmailSignupSection = () => {
               delay: 0.5,
               ease: [0.16, 1, 0.3, 1]
             }}
-            className="text-muted-foreground mb-10 text-base sm:text-lg max-w-sm mx-auto leading-relaxed"
+            className={`text-muted-foreground max-w-sm mx-auto leading-relaxed ${isMobile ? 'text-sm mb-6' : 'text-base sm:text-lg mb-10'}`}
           >
             Be the first to know when we launch. Get exclusive updates and early access.
           </motion.p>
@@ -133,16 +137,16 @@ const EmailSignupSection = () => {
                   onFocus={() => setIsFocused(true)}
                   onBlur={() => setIsFocused(false)}
                   required
-                  className="
-                    w-full px-5 py-4
+                  className={`
+                    w-full
                     bg-white/5 backdrop-blur-sm
                     border border-white/10
                     rounded-xl
                     text-white placeholder:text-white/40
                     focus:outline-none focus:border-revz-red/50
                     transition-all duration-300
-                    text-base
-                  "
+                    ${isMobile ? 'px-4 py-3 text-sm' : 'px-5 py-4 text-base'}
+                  `}
                 />
               </div>
 
@@ -151,8 +155,8 @@ const EmailSignupSection = () => {
                 type="submit"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="
-                  w-full py-4 px-6
+                className={`
+                  w-full
                   bg-linear-to-r from-revz-red to-red-500
                   hover:from-red-500 hover:to-revz-red
                   text-white font-semibold
@@ -162,7 +166,8 @@ const EmailSignupSection = () => {
                   hover:shadow-xl hover:shadow-revz-red/40
                   relative overflow-hidden
                   group
-                "
+                  ${isMobile ? 'py-3 px-4 text-sm' : 'py-4 px-6'}
+                `}
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">
                   Notify Me

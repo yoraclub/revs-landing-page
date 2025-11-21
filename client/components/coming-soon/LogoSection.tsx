@@ -6,11 +6,13 @@ import { hyperspeedPresets } from "@/components/HyperSpeed/hyperspeedPresets";
 interface LogoSectionProps {
   arrowClicked: boolean;
   onScrollDown: () => void;
+  isMobile: boolean;
+  isTablet: boolean;
 }
 
-const LogoSection = ({ arrowClicked, onScrollDown }: LogoSectionProps) => {
+const LogoSection = ({ arrowClicked, onScrollDown, isMobile, isTablet }: LogoSectionProps) => {
   return (
-    <section className="h-screen flex flex-col items-center justify-start pt-34 px-6 relative">
+    <section className={`h-screen flex flex-col items-center justify-start relative ${isMobile ? 'pt-24 px-4' : isTablet ? 'pt-28 px-5' : 'pt-34 px-6'}`}>
       <div className="absolute inset-0">
         <HyperSpeed effectOptions={hyperspeedPresets.two as any} />
       </div>
@@ -32,7 +34,7 @@ const LogoSection = ({ arrowClicked, onScrollDown }: LogoSectionProps) => {
             ease: [0.16, 1, 0.3, 1]
           }}
         >
-          <Logo className="w-64 sm:w-80 md:w-96" />
+          <Logo className={isMobile ? 'w-48' : isTablet ? 'w-64' : 'w-80 md:w-96'} />
         </motion.div>
       </motion.div>
 
@@ -44,13 +46,13 @@ const LogoSection = ({ arrowClicked, onScrollDown }: LogoSectionProps) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10, transition: { duration: 0.5 } }}
             transition={{ delay: 2.5, duration: 1 }}
-            className="absolute bottom-12 left-1/2 -translate-x-1/2 cursor-pointer group"
+            className={`absolute left-1/2 -translate-x-1/2 cursor-pointer group ${isMobile ? 'bottom-8' : 'bottom-12'}`}
             onClick={onScrollDown}
           >
             <motion.svg
               xmlns="http://www.w3.org/2000/svg"
-              width="28"
-              height="28"
+              width={isMobile ? "24" : "28"}
+              height={isMobile ? "24" : "28"}
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
