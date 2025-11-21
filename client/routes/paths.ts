@@ -9,6 +9,7 @@ export const ROUTE_PATHS = {
   MOBILE_APP: "/mobile-app",
   FEATURES: "/features",
   PRICING: "/pricing",
+  COMING_SOON: "/coming-soon",
   NOT_FOUND: "*",
 
   // Add more routes here as needed
@@ -52,5 +53,10 @@ export const ROUTE_CONFIG: Record<string, RouteConfig> = {
     path: ROUTE_PATHS.NOT_FOUND,
     title: "Page Not Found - REVZ",
     description: "The requested page could not be found.",
+  },
+  COMING_SOON: {
+    path: ROUTE_PATHS.COMING_SOON,
+    title: "Coming Soon - REVZ",
+    description: "Something exciting is coming. Sign up to be notified when we launch.",
   },
 } as const;

@@ -14,6 +14,7 @@ import Index from "@/pages/Index";
 import MobileApp from "@/pages/MobileApp";
 import Features from "@/pages/Features";
 import Pricing from "@/pages/Pricing";
+import ComingSoon from "@/pages/ComingSoon";
 import NotFound from "@/pages/NotFound";
 
 // Lazy-loaded components for code splitting (add as needed)
@@ -70,6 +71,14 @@ export const routeComponents = [
     ),
   },
   {
+    path: ROUTE_PATHS.COMING_SOON,
+    element: (
+      <PageTransition>
+        <ComingSoon />
+      </PageTransition>
+    ),
+  },
+  {
     path: ROUTE_PATHS.NOT_FOUND,
     element: (
       <Layout>
@@ -100,4 +109,4 @@ export const createRoutes = () => {
 };
 
 // Export components for direct import if needed
-export { Index, MobileApp, Features, Pricing, NotFound, LazyWrapper };
+export { Index, MobileApp, Features, Pricing, ComingSoon, NotFound, LazyWrapper };
