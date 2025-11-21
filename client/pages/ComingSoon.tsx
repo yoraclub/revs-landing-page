@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import LogoSection from "@/components/coming-soon/LogoSection";
+import TeaseSection from "@/components/coming-soon/TeaseSection";
 import EmailSignupSection from "@/components/coming-soon/EmailSignupSection";
 import Lenis from "lenis";
 import Snap from "lenis/snap";
@@ -60,6 +61,7 @@ const ComingSoon = () => {
     // Add snap points for each section
     snap.add(0);
     snap.add(viewportHeight);
+    snap.add(viewportHeight * 2);
 
     function raf(time: number) {
       lenis.raf(time);
@@ -85,6 +87,7 @@ const ComingSoon = () => {
       </div>
 
       <LogoSection arrowClicked={arrowClicked} onScrollDown={handleScrollDown} />
+      <TeaseSection />
       <EmailSignupSection />
     </div>
   );
