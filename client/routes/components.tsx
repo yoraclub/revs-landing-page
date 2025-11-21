@@ -73,19 +73,19 @@ export const routeComponents = [
   {
     path: ROUTE_PATHS.HOME,
     element: (
-      <PageTransition>
+      // <PageTransition>
         <ComingSoon />
-      </PageTransition>
+      // </PageTransition>
     ),
   },
   {
     path: ROUTE_PATHS.NOT_FOUND,
     element: (
-      <Layout>
-        <PageTransition>
+      // <Layout>
+        // <PageTransition>
           <NotFound />
-        </PageTransition>
-      </Layout>
+        // </PageTransition>
+      // </Layout>
     ),
   },
   // Add more routes here:
