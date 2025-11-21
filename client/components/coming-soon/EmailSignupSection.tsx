@@ -57,10 +57,10 @@ const EmailSignupSection = ({ isMobile, isTablet, height }: EmailSignupSectionPr
             <Plasma
               color="#FF1801"
               speed={1}
-              direction="pingpong"
+              direction="forward"
               scale={isMobile ? 0.8 : 1}
-              opacity={0.6}
-              mouseInteractive={!isMobile}
+              opacity={1}
+              mouseInteractive={false}
             />
           </Suspense>
         )}

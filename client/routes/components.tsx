@@ -30,48 +30,48 @@ const LazyWrapper = ({ children }: { children: React.ReactNode }) => (
 
 // Route configuration with components wrapped in Layout
 export const routeComponents = [
+  // {
+  //   path: ROUTE_PATHS.HOME,
+  //   element: (
+  //     <Layout>
+  //       <PageTransition>
+  //         <Index />
+  //       </PageTransition>
+  //     </Layout>
+  //   ),
+  // },
+  // {
+  //   path: ROUTE_PATHS.MOBILE_APP,
+  //   element: (
+  //     <Layout>
+  //       <PageTransition>
+  //         <MobileApp />
+  //       </PageTransition>
+  //     </Layout>
+  //   ),
+  // },
+  // {
+  //   path: ROUTE_PATHS.FEATURES,
+  //   element: (
+  //     <Layout>
+  //       <PageTransition>
+  //         <Features />
+  //       </PageTransition>
+  //     </Layout>
+  //   ),
+  // },
+  // {
+  //   path: ROUTE_PATHS.PRICING,
+  //   element: (
+  //     <Layout>
+  //       <PageTransition>
+  //         <Pricing />
+  //       </PageTransition>
+  //     </Layout>
+  //   ),
+  // },
   {
     path: ROUTE_PATHS.HOME,
-    element: (
-      <Layout>
-        <PageTransition>
-          <Index />
-        </PageTransition>
-      </Layout>
-    ),
-  },
-  {
-    path: ROUTE_PATHS.MOBILE_APP,
-    element: (
-      <Layout>
-        <PageTransition>
-          <MobileApp />
-        </PageTransition>
-      </Layout>
-    ),
-  },
-  {
-    path: ROUTE_PATHS.FEATURES,
-    element: (
-      <Layout>
-        <PageTransition>
-          <Features />
-        </PageTransition>
-      </Layout>
-    ),
-  },
-  {
-    path: ROUTE_PATHS.PRICING,
-    element: (
-      <Layout>
-        <PageTransition>
-          <Pricing />
-        </PageTransition>
-      </Layout>
-    ),
-  },
-  {
-    path: ROUTE_PATHS.COMING_SOON,
     element: (
       <PageTransition>
         <ComingSoon />
