@@ -109,6 +109,14 @@ const ChartTooltipContent = React.forwardRef<
       indicator?: "line" | "dot" | "dashed";
       nameKey?: string;
       labelKey?: string;
+      payload?: Array<{
+        value?: string | number;
+        name?: string;
+        dataKey?: string;
+        color?: string;
+        payload?: Record<string, unknown> & { fill?: string };
+      }>;
+      label?: string;
     }
 >(
   (
@@ -197,7 +205,7 @@ const ChartTooltipContent = React.forwardRef<
                 )}
               >
                 {formatter && item?.value !== undefined && item.name ? (
-                  formatter(item.value, item.name, item, index, item.payload)
+                  formatter(item.value, item.name, item, index, item.payload as unknown as typeof payload)
                 ) : (
                   <>
                     {itemConfig?.icon ? (
@@ -259,9 +267,14 @@ const ChartLegend = RechartsPrimitive.Legend;
 const ChartLegendContent = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> &
-    Pick<RechartsPrimitive.LegendProps, "payload" | "verticalAlign"> & {
+    Pick<RechartsPrimitive.LegendProps, "verticalAlign"> & {
       hideIcon?: boolean;
       nameKey?: string;
+      payload?: Array<{
+        value: string;
+        dataKey?: string;
+        color?: string;
+      }>;
     }
 >(
   (
