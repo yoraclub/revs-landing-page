@@ -67,7 +67,8 @@ const ComingSoon = () => {
     // Initialize Snap with Lenis
     const snap = new Snap(lenis, {
       type: "proximity",
-      debounce: isMobile ? 100 : 50,
+      debounce: isMobile ? 300 : 300,
+      lerp: isMobile ? 0.1 : 0.05,
     });
 
     // Add snap points using actual DOM positions
