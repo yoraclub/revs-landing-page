@@ -35,36 +35,27 @@ const LogoSection = ({ arrowClicked, onScrollDown }: LogoSectionProps) => {
       <AnimatePresence>
         {!arrowClicked && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.6 }}
-            exit={{ opacity: 0, transition: { duration: 0.8 } }}
-            transition={{ delay: 2.5, duration: 1.2 }}
-            className="absolute bottom-12 left-1/2 -translate-x-1/2 cursor-pointer"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10, transition: { duration: 0.5 } }}
+            transition={{ delay: 2.5, duration: 1 }}
+            className="absolute bottom-12 left-1/2 -translate-x-1/2 cursor-pointer group"
             onClick={onScrollDown}
           >
-            <motion.div
-              animate={{ y: [0, 8, 0] }}
-              transition={{
-                repeat: Infinity,
-                duration: 3,
-                ease: [0.45, 0, 0.55, 1]
-              }}
-              className="text-muted-foreground"
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-white/50 group-hover:text-revz-red group-hover:animate-bounce-subtle transition-colors duration-300"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M12 5v14M19 12l-7 7-7-7" />
-              </svg>
-            </motion.div>
+              <path d="M12 5v14M19 12l-7 7-7-7" />
+            </svg>
           </motion.div>
         )}
       </AnimatePresence>
