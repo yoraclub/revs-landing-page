@@ -1,7 +1,9 @@
+import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Logo } from "@/components/Logo";
-import HyperSpeed from "@/components/HyperSpeed/HyperSpeed";
 import { hyperspeedPresets } from "@/components/HyperSpeed/hyperspeedPresets";
+
+const HyperSpeed = lazy(() => import("@/components/HyperSpeed/HyperSpeed"));
 
 interface LogoSectionProps {
   arrowClicked: boolean;
@@ -12,13 +14,39 @@ interface LogoSectionProps {
 }
 
 const LogoSection = ({ arrowClicked, onScrollDown, isMobile, isTablet, height }: LogoSectionProps) => {
+  const sectionRef = useRef<HTMLElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '100px' }
+    );
+
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section
+      ref={sectionRef}
       className={`flex flex-col items-center justify-start relative overflow-hidden ${isMobile ? 'pt-24 px-4' : isTablet ? 'pt-28 px-5' : 'pt-34 px-6'}`}
       style={{ height }}
     >
       <div className="absolute inset-0 overflow-hidden [&_canvas]:w-full! [&_canvas]:h-full! [&_canvas]:max-w-full! [&_canvas]:max-h-full!">
-        <HyperSpeed effectOptions={hyperspeedPresets.two as any} />
+        {isVisible && (
+          <Suspense fallback={null}>
+            <HyperSpeed effectOptions={hyperspeedPresets.two as any} />
+          </Suspense>
+        )}
       </div>
       <motion.div
         initial={{ opacity: 0, y: 60 }}
