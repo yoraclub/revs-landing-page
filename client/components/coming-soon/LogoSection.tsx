@@ -1,5 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Logo } from "@/components/Logo";
+import HyperSpeed from "@/components/HyperSpeed/HyperSpeed";
+import { hyperspeedPresets } from "@/components/HyperSpeed/hyperspeedPresets";
 
 interface LogoSectionProps {
   arrowClicked: boolean;
@@ -8,7 +10,10 @@ interface LogoSectionProps {
 
 const LogoSection = ({ arrowClicked, onScrollDown }: LogoSectionProps) => {
   return (
-    <section className="h-screen flex flex-col items-center justify-center px-6 relative">
+    <section className="h-screen flex flex-col items-center justify-start pt-34 px-6 relative">
+      <div className="absolute inset-0">
+        <HyperSpeed effectOptions={hyperspeedPresets.two as any} />
+      </div>
       <motion.div
         initial={{ opacity: 0, y: 60 }}
         animate={{ opacity: 1, y: 0 }}
@@ -42,7 +47,7 @@ const LogoSection = ({ arrowClicked, onScrollDown }: LogoSectionProps) => {
             className="absolute bottom-12 left-1/2 -translate-x-1/2 cursor-pointer group"
             onClick={onScrollDown}
           >
-            <svg
+            <motion.svg
               xmlns="http://www.w3.org/2000/svg"
               width="28"
               height="28"
@@ -52,10 +57,17 @@ const LogoSection = ({ arrowClicked, onScrollDown }: LogoSectionProps) => {
               strokeWidth="1.5"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="text-white/50 group-hover:text-revz-red group-hover:animate-bounce-subtle transition-colors duration-300"
+              className="text-white/50 group-hover:text-revz-red transition-colors duration-300"
+              animate={{ y: [0, -8, 0] }}
+              transition={{
+                duration: 0.6,
+                repeat: Infinity,
+                repeatDelay: 1.4,
+                ease: "easeInOut"
+              }}
             >
               <path d="M12 5v14M19 12l-7 7-7-7" />
-            </svg>
+            </motion.svg>
           </motion.div>
         )}
       </AnimatePresence>
