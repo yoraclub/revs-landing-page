@@ -167,3 +167,29 @@ html.lenis, html.lenis body {
   }
 
 }
+
+/* Safari-specific backdrop-filter fixes */
+@supports (-webkit-backdrop-filter: none) or (backdrop-filter: none) {
+  .glass-surface {
+    -webkit-backdrop-filter: blur(16px) saturate(1.8);
+    backdrop-filter: blur(16px) saturate(1.8);
+  }
+}
+
+/* Ensure GlassSurface parent containers don't break backdrop-filter */
+.glass-surface-container {
+  position: relative;
+  overflow: visible;
+}
+
+/* Safari fix for elements that need backdrop-filter */
+@supports (-webkit-backdrop-filter: none) {
+  .glass-surface {
+    /* Force hardware acceleration */
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+    /* Ensure proper compositing */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+}

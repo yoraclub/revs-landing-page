@@ -203,9 +203,13 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
       borderRadius: `${borderRadius}px`,
       '--glass-frost': backgroundOpacity,
       '--glass-saturation': saturation,
-      // Safari fix: ensure proper stacking context for backdrop-filter
+      // Safari fixes for backdrop-filter
       isolation: 'isolate',
-      transform: 'translateZ(0)',
+      transform: 'translate3d(0, 0, 0)',
+      WebkitTransform: 'translate3d(0, 0, 0)',
+      backfaceVisibility: 'hidden',
+      WebkitBackfaceVisibility: 'hidden',
+      zIndex: 1,
     } as React.CSSProperties;
 
     if (svgFiltersSupported) {
@@ -282,7 +286,7 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
   }, [style, width, height, borderRadius, backgroundOpacity, saturation, svgFiltersSupported, backdropFilterSupported, isDarkMode, filterId]);
 
   const glassSurfaceClasses =
-    'relative flex items-center justify-center overflow-hidden transition-opacity duration-[260ms] ease-out';
+    'glass-surface relative flex items-center justify-center overflow-hidden transition-opacity duration-[260ms] ease-out';
 
   const focusVisibleClasses = useMemo(() =>
     isDarkMode
