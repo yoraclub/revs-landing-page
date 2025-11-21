@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,6 +43,18 @@ const ComingSoon = () => {
       touchMultiplier: 0.8,
     });
     lenisRef.current = lenis;
+
+    // Hide arrow on scroll (with threshold)
+    let initialScroll = true;
+    lenis.on("scroll", ({ scroll }: { scroll: number }) => {
+      if (initialScroll) {
+        initialScroll = false;
+        return;
+      }
+      if (scroll > 50) {
+        setArrowClicked(true);
+      }
+    });
 
     // Initialize Snap with Lenis
     const snap = new Snap(lenis, {
@@ -111,39 +123,42 @@ const ComingSoon = () => {
         </motion.div>
 
         {/* Scroll indicator */}
-        {!arrowClicked && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.6 }}
-            transition={{ delay: 2.5, duration: 1.2 }}
-            className="absolute bottom-12 left-1/2 -translate-x-1/2 cursor-pointer"
-            onClick={handleScrollDown}
-          >
+        <AnimatePresence>
+          {!arrowClicked && (
             <motion.div
-              animate={{ y: [0, 8, 0] }}
-              transition={{
-                repeat: Infinity,
-                duration: 3,
-                ease: [0.45, 0, 0.55, 1]
-              }}
-              className="text-muted-foreground"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.6 }}
+              exit={{ opacity: 0, transition: { duration: 0.8 } }}
+              transition={{ delay: 2.5, duration: 1.2 }}
+              className="absolute bottom-12 left-1/2 -translate-x-1/2 cursor-pointer"
+              onClick={handleScrollDown}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+              <motion.div
+                animate={{ y: [0, 8, 0] }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 3,
+                  ease: [0.45, 0, 0.55, 1]
+                }}
+                className="text-muted-foreground"
               >
-                <path d="M12 5v14M19 12l-7 7-7-7" />
-              </svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M12 5v14M19 12l-7 7-7-7" />
+                </svg>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
+          )}
+        </AnimatePresence>
       </section>
 
       {/* Section 2: Email Signup */}

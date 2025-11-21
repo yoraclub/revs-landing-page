@@ -12,7 +12,7 @@ export default function Footer() {
           {/* Top Section - Logo and CTA */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pb-8 border-b border-gray-200/50 dark:border-gray-700/50">
             <div className="flex items-center gap-4">
-              <Logo className="w-48 h-[56px]" />
+              <Logo className="w-48 h-14" />
             </div>
             <Link
               to={ROUTE_PATHS.MOBILE_APP}
