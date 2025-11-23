@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { motion } from "framer-motion";
+import { subscribeEmail } from "@/api/subscribe";
 
 const Plasma = lazy(() => import("@/components/Plasma").then(m => ({ default: m.Plasma })));
 const GlassSurface = lazy(() => import("@/components/GlassSurface"));
@@ -14,6 +15,9 @@ const EmailSignupSection = ({ isMobile, isTablet, height }: EmailSignupSectionPr
   const [email, setEmail] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -35,13 +39,27 @@ const EmailSignupSection = ({ isMobile, isTablet, height }: EmailSignupSectionPr
     return () => observer.disconnect();
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
-      // TODO: Integrate with your email service
-      console.log("Email submitted:", email);
-      setIsSubmitted(true);
-      setEmail("");
+    if (!email) return;
+
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const response = await subscribeEmail(email);
+      if (response.success) {
+        setSuccessMessage(response.message);
+        setIsSubmitted(true);
+        setEmail("");
+      } else {
+        setError(response.message);
+      }
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || "Failed to subscribe. Please try again.";
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -139,7 +157,7 @@ const EmailSignupSection = ({ isMobile, isTablet, height }: EmailSignupSectionPr
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <p className="text-white font-semibold text-lg mb-1">You're on the list!</p>
+              <p className="text-white font-semibold text-lg mb-1">{successMessage}</p>
               <p className="text-muted-foreground text-sm">We'll notify you when we launch.</p>
             </motion.div>
           ) : (
@@ -183,11 +201,16 @@ const EmailSignupSection = ({ isMobile, isTablet, height }: EmailSignupSectionPr
                 />
               </div>
 
+              {error && (
+                <p className="text-red-400 text-sm text-center">{error}</p>
+              )}
+
               {/* Custom styled button */}
               <motion.button
                 type="submit"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                disabled={isLoading}
+                whileHover={{ scale: isLoading ? 1 : 1.02 }}
+                whileTap={{ scale: isLoading ? 1 : 0.98 }}
                 className={`
                   w-full
                   bg-linear-to-r from-revz-red to-red-500
@@ -200,18 +223,21 @@ const EmailSignupSection = ({ isMobile, isTablet, height }: EmailSignupSectionPr
                   relative overflow-hidden
                   group
                   ${isMobile ? 'py-3 px-4 text-sm' : 'py-4 px-6'}
+                  ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}
                 `}
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">
-                  Notify Me
-                  <svg
-                    className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
+                  {isLoading ? 'Subscribing...' : 'Notify Me'}
+                  {!isLoading && (
+                    <svg
+                      className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                  )}
                 </span>
                 <div className="absolute inset-0 bg-linear-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
               </motion.button>

@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { handleHello } from "./routes/hello";
+import { handleSubscribe } from "./routes/subscribe";
 import { errorHandler } from "./middleware/errorHandler";
 import { corsConfig } from "./config/cors";
 import { expressConfig } from "./config/express";
@@ -35,6 +36,8 @@ export function createServer() {
   });
 
   app.get("/api/hello", handleHello);
+
+  app.post("/api/subscribe", handleSubscribe);
 
   // Global error handling middleware (must be last)
   app.use(errorHandler);
