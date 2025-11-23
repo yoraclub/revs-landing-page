@@ -56,6 +56,8 @@ interface HyperspeedOptions {
 interface HyperspeedProps {
   effectOptions?: Partial<HyperspeedOptions>;
   paused?: boolean;
+  isMobile?: boolean;
+  isTablet?: boolean;
 }
 
 const defaultOptions: HyperspeedOptions = {
@@ -952,7 +954,7 @@ class App {
       alpha: true
     });
     this.renderer.setSize(container.offsetWidth, container.offsetHeight, false);
-    this.renderer.setPixelRatio(window.devicePixelRatio);
+    // DPR will be set by the component based on device type
 
     this.composer = new EffectComposer(this.renderer);
     container.appendChild(this.renderer.domElement);
@@ -1225,7 +1227,7 @@ class App {
   }
 }
 
-const Hyperspeed: FC<HyperspeedProps> = ({ effectOptions = {}, paused = false }) => {
+const Hyperspeed: FC<HyperspeedProps> = ({ effectOptions = {}, paused = false, isMobile = false, isTablet = false }) => {
   const mergedOptions: HyperspeedOptions = {
     ...defaultOptions,
     ...effectOptions
@@ -1254,6 +1256,11 @@ const Hyperspeed: FC<HyperspeedProps> = ({ effectOptions = {}, paused = false })
 
     const myApp = new App(container, options);
     appRef.current = myApp;
+
+    // Set DPR based on device type
+    const dpr = isMobile ? 1 : isTablet ? 1.5 : Math.min(window.devicePixelRatio, 2);
+    myApp.renderer.setPixelRatio(dpr);
+
     myApp.loadAssets().then(myApp.init);
 
     return () => {
@@ -1261,7 +1268,7 @@ const Hyperspeed: FC<HyperspeedProps> = ({ effectOptions = {}, paused = false })
         appRef.current.dispose();
       }
     };
-  }, [mergedOptions]);
+  }, [mergedOptions, isMobile, isTablet]);
 
   // Handle pause/resume
   useEffect(() => {

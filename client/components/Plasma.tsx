@@ -9,6 +9,7 @@ interface PlasmaProps {
   opacity?: number;
   mouseInteractive?: boolean;
   paused?: boolean;
+  isMobile?: boolean;
 }
 
 const hexToRgb = (hex: string): [number, number, number] => {
@@ -96,7 +97,8 @@ export const Plasma: React.FC<PlasmaProps> = ({
   scale = 1,
   opacity = 1,
   mouseInteractive = true,
-  paused = false
+  paused = false,
+  isMobile = false
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mousePos = useRef({ x: 0, y: 0 });
@@ -119,7 +121,7 @@ export const Plasma: React.FC<PlasmaProps> = ({
       webgl: 2,
       alpha: true,
       antialias: false,
-      dpr: Math.min(window.devicePixelRatio || 1, 2)
+      dpr: Math.min(window.devicePixelRatio || 1, isMobile ? 1 : 1.5)
     });
     const gl = renderer.gl;
     const canvas = gl.canvas as HTMLCanvasElement;
@@ -215,7 +217,7 @@ export const Plasma: React.FC<PlasmaProps> = ({
         containerRef.current?.removeChild(canvas);
       } catch {}
     };
-  }, [color, speed, direction, scale, opacity, mouseInteractive]);
+  }, [color, speed, direction, scale, opacity, mouseInteractive, isMobile]);
 
   return <div ref={containerRef} className="w-full h-full relative overflow-hidden" />;
 };

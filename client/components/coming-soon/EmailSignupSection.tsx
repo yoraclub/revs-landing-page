@@ -109,6 +109,7 @@ const EmailSignupSection = ({ isMobile, isTablet, height }: EmailSignupSectionPr
               opacity={1}
               mouseInteractive={false}
               paused={!isInView}
+              isMobile={isMobile}
             />
           </Suspense>
         )}

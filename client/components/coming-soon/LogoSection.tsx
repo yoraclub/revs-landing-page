@@ -62,7 +62,7 @@ const LogoSection = ({ arrowClicked, onScrollDown, isMobile, isTablet, height }:
       <div className="absolute inset-0 overflow-hidden [&_canvas]:w-full! [&_canvas]:h-full! [&_canvas]:max-w-full! [&_canvas]:max-h-full!">
         {isVisible && (
           <Suspense fallback={null}>
-            <HyperSpeed effectOptions={hyperspeedPresets.two as any} paused={!isInView} />
+            <HyperSpeed effectOptions={hyperspeedPresets.two as any} paused={!isInView} isMobile={isMobile} isTablet={isTablet} />
           </Suspense>
         )}
       </div>
