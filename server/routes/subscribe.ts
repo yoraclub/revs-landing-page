@@ -1,8 +1,9 @@
 import { RequestHandler } from "express";
 import { z } from "zod";
+import { count } from "drizzle-orm";
 import { db } from "../db";
 import { subscribers } from "../db/schema";
-import { SubscribeResponse } from "@shared/api";
+import { SubscribeResponse, SubscriberCountResponse } from "@shared/api";
 
 const subscribeSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -45,5 +46,18 @@ export const handleSubscribe: RequestHandler = async (req, res) => {
       message: "Failed to subscribe. Please try again.",
     };
     res.status(500).json(response);
+  }
+};
+
+export const handleSubscriberCount: RequestHandler = async (_req, res) => {
+  try {
+    const result = await db.select({ count: count() }).from(subscribers);
+    const response: SubscriberCountResponse = {
+      count: result[0]?.count ?? 0,
+    };
+    res.status(200).json(response);
+  } catch (error) {
+    console.error("Subscriber count error:", error);
+    res.status(500).json({ count: 0 });
   }
 };

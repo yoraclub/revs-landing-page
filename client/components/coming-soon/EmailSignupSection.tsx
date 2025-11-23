@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { motion } from "framer-motion";
-import { subscribeEmail } from "@/api/subscribe";
+import { subscribeEmail, getSubscriberCount } from "@/api/subscribe";
 
 const Plasma = lazy(() => import("@/components/Plasma").then(m => ({ default: m.Plasma })));
 const GlassSurface = lazy(() => import("@/components/GlassSurface"));
@@ -20,6 +20,7 @@ const EmailSignupSection = ({ isMobile, isTablet, height }: EmailSignupSectionPr
   const [successMessage, setSuccessMessage] = useState("");
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [subscriberCount, setSubscriberCount] = useState<number | null>(null);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -39,6 +40,12 @@ const EmailSignupSection = ({ isMobile, isTablet, height }: EmailSignupSectionPr
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    getSubscriberCount()
+      .then((res) => setSubscriberCount(res.count))
+      .catch(() => setSubscriberCount(null));
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
@@ -52,6 +59,10 @@ const EmailSignupSection = ({ isMobile, isTablet, height }: EmailSignupSectionPr
         setSuccessMessage(response.message);
         setIsSubmitted(true);
         setEmail("");
+        // Only increment if it's a new subscription, not a duplicate
+        if (subscriberCount !== null && response.message === "Successfully subscribed!") {
+          setSubscriberCount(subscriberCount + 1);
+        }
       } else {
         setError(response.message);
       }
@@ -137,10 +148,40 @@ const EmailSignupSection = ({ isMobile, isTablet, height }: EmailSignupSectionPr
               delay: 0.5,
               ease: [0.16, 1, 0.3, 1]
             }}
-            className={`text-muted-foreground max-w-sm mx-auto leading-relaxed ${isMobile ? 'text-sm mb-6' : 'text-base sm:text-lg mb-10'}`}
+            className={`text-muted-foreground max-w-sm mx-auto leading-relaxed ${isMobile ? 'text-sm mb-4' : 'text-base sm:text-lg mb-6'}`}
           >
             Be the first to know when we launch. Get exclusive updates and early access.
           </motion.p>
+
+          {subscriberCount !== null && subscriberCount > 0 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{
+                duration: 0.8,
+                delay: 0.6,
+                ease: [0.16, 1, 0.3, 1]
+              }}
+              className={`flex items-center justify-center gap-2 ${isMobile ? 'mb-6' : 'mb-8'}`}
+            >
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm">
+                <div className="flex -space-x-1">
+                  <div className="w-2 h-2 rounded-full bg-revz-red" />
+                  <div className="w-2 h-2 rounded-full bg-red-400" />
+                  <div className="w-2 h-2 rounded-full bg-red-300" />
+                </div>
+                <span className={`font-medium ${isMobile ? 'text-xs' : 'text-sm'}`}>
+                  <span className="text-transparent bg-clip-text bg-linear-to-r from-revz-red to-red-400 font-bold">
+                    {subscriberCount.toLocaleString()}
+                  </span>
+                  <span className="text-white/70">
+                    {subscriberCount === 1 ? ' fan' : ' fans'} on the grid
+                  </span>
+                </span>
+              </div>
+            </motion.div>
+          )}
 
           {isSubmitted ? (
             <motion.div
