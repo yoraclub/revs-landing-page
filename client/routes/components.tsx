@@ -30,6 +30,24 @@ const LazyWrapper = ({ children }: { children: React.ReactNode }) => (
 
 // Route configuration with components wrapped in Layout
 export const routeComponents = [
+  {
+    path: ROUTE_PATHS.HOME,
+    element: (
+      // <PageTransition>
+        <ComingSoon />
+      // </PageTransition>
+    ),
+  },
+  {
+    path: ROUTE_PATHS.NOT_FOUND,
+    element: (
+      // <Layout>
+        // <PageTransition>
+          <NotFound />
+        // </PageTransition>
+      // </Layout>
+    ),
+  },
   // {
   //   path: ROUTE_PATHS.HOME,
   //   element: (
@@ -70,24 +88,6 @@ export const routeComponents = [
   //     </Layout>
   //   ),
   // },
-  {
-    path: ROUTE_PATHS.HOME,
-    element: (
-      // <PageTransition>
-        <ComingSoon />
-      // </PageTransition>
-    ),
-  },
-  {
-    path: ROUTE_PATHS.NOT_FOUND,
-    element: (
-      // <Layout>
-        // <PageTransition>
-          <NotFound />
-        // </PageTransition>
-      // </Layout>
-    ),
-  },
   // Add more routes here:
   // {
   //   path: ROUTE_PATHS.ABOUT,

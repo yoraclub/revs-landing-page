@@ -16,7 +16,9 @@ interface LogoSectionProps {
 const LogoSection = ({ arrowClicked, onScrollDown, isMobile, isTablet, height }: LogoSectionProps) => {
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [isInView, setIsInView] = useState(true);
 
+  // Initial load observer (lazy load)
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
@@ -35,6 +37,22 @@ const LogoSection = ({ arrowClicked, onScrollDown, isMobile, isTablet, height }:
     return () => observer.disconnect();
   }, []);
 
+  // Continuous visibility tracking for pause/resume
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { rootMargin: '50% 0px' } // Keep running until 50% viewport height off-screen
+    );
+
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section
       ref={sectionRef}
@@ -44,7 +62,7 @@ const LogoSection = ({ arrowClicked, onScrollDown, isMobile, isTablet, height }:
       <div className="absolute inset-0 overflow-hidden [&_canvas]:w-full! [&_canvas]:h-full! [&_canvas]:max-w-full! [&_canvas]:max-h-full!">
         {isVisible && (
           <Suspense fallback={null}>
-            <HyperSpeed effectOptions={hyperspeedPresets.two as any} />
+            <HyperSpeed effectOptions={hyperspeedPresets.two as any} paused={!isInView} />
           </Suspense>
         )}
       </div>

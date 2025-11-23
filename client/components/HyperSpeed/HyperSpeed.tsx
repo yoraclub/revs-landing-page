@@ -55,6 +55,7 @@ interface HyperspeedOptions {
 
 interface HyperspeedProps {
   effectOptions?: Partial<HyperspeedOptions>;
+  paused?: boolean;
 }
 
 const defaultOptions: HyperspeedOptions = {
@@ -925,6 +926,7 @@ class App {
   clock: THREE.Clock;
   assets: Record<string, any>;
   disposed: boolean;
+  paused: boolean;
   road: Road;
   leftCarLights: CarLights;
   rightCarLights: CarLights;
@@ -975,6 +977,7 @@ class App {
     this.clock = new THREE.Clock();
     this.assets = {};
     this.disposed = false;
+    this.paused = false;
 
     this.road = new Road(this, options);
     this.leftCarLights = new CarLights(
@@ -1204,6 +1207,13 @@ class App {
 
   tick() {
     if (this.disposed || !this) return;
+    requestAnimationFrame(this.tick);
+
+    if (this.paused) {
+      this.clock.getDelta(); // Keep clock in sync
+      return;
+    }
+
     if (resizeRendererToDisplaySize(this.renderer, this.setSize)) {
       const canvas = this.renderer.domElement;
       this.camera.aspect = canvas.clientWidth / canvas.clientHeight;
@@ -1212,11 +1222,10 @@ class App {
     const delta = this.clock.getDelta();
     this.render(delta);
     this.update(delta);
-    requestAnimationFrame(this.tick);
   }
 }
 
-const Hyperspeed: FC<HyperspeedProps> = ({ effectOptions = {} }) => {
+const Hyperspeed: FC<HyperspeedProps> = ({ effectOptions = {}, paused = false }) => {
   const mergedOptions: HyperspeedOptions = {
     ...defaultOptions,
     ...effectOptions
@@ -1253,6 +1262,13 @@ const Hyperspeed: FC<HyperspeedProps> = ({ effectOptions = {} }) => {
       }
     };
   }, [mergedOptions]);
+
+  // Handle pause/resume
+  useEffect(() => {
+    if (appRef.current) {
+      appRef.current.paused = paused;
+    }
+  }, [paused]);
 
   return <div id="lights" className="w-full h-full" ref={hyperspeed}></div>;
 };

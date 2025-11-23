@@ -8,6 +8,7 @@ interface PlasmaProps {
   scale?: number;
   opacity?: number;
   mouseInteractive?: boolean;
+  paused?: boolean;
 }
 
 const hexToRgb = (hex: string): [number, number, number] => {
@@ -94,10 +95,17 @@ export const Plasma: React.FC<PlasmaProps> = ({
   direction = 'forward',
   scale = 1,
   opacity = 1,
-  mouseInteractive = true
+  mouseInteractive = true,
+  paused = false
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mousePos = useRef({ x: 0, y: 0 });
+  const pausedRef = useRef(paused);
+
+  // Keep pausedRef in sync with prop
+  useEffect(() => {
+    pausedRef.current = paused;
+  }, [paused]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -171,7 +179,15 @@ export const Plasma: React.FC<PlasmaProps> = ({
 
     let raf = 0;
     const t0 = performance.now();
+    let lastTime = 0;
     const loop = (t: number) => {
+      raf = requestAnimationFrame(loop);
+
+      if (pausedRef.current) {
+        lastTime = t;
+        return;
+      }
+
       let timeValue = (t - t0) * 0.001;
       if (direction === 'pingpong') {
         const pingpongDuration = 10;
@@ -186,7 +202,6 @@ export const Plasma: React.FC<PlasmaProps> = ({
         (program.uniforms.iTime as any).value = timeValue;
       }
       renderer.render({ scene: mesh });
-      raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
 

@@ -20,8 +20,10 @@ const EmailSignupSection = ({ isMobile, isTablet, height }: EmailSignupSectionPr
   const [successMessage, setSuccessMessage] = useState("");
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [isInView, setIsInView] = useState(false);
   const [subscriberCount, setSubscriberCount] = useState<number | null>(null);
 
+  // Initial load observer (lazy load)
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
@@ -34,6 +36,22 @@ const EmailSignupSection = ({ isMobile, isTablet, height }: EmailSignupSectionPr
         }
       },
       { rootMargin: '100px' }
+    );
+
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
+
+  // Continuous visibility tracking for pause/resume
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { rootMargin: '50% 0px' } // Keep running until 50% viewport height off-screen
     );
 
     observer.observe(section);
@@ -90,6 +108,7 @@ const EmailSignupSection = ({ isMobile, isTablet, height }: EmailSignupSectionPr
               scale={isMobile ? 0.8 : 1}
               opacity={1}
               mouseInteractive={false}
+              paused={!isInView}
             />
           </Suspense>
         )}
