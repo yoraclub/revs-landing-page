@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { motion } from "framer-motion";
 import { subscribeEmail, getSubscriberCount } from "@/api/subscribe";
+import { NumberTicker } from "@/components/NumberTicker";
 
 const Plasma = lazy(() => import("@/components/Plasma").then(m => ({ default: m.Plasma })));
 const GlassSurface = lazy(() => import("@/components/GlassSurface"));
@@ -193,7 +194,7 @@ const EmailSignupSection = ({ isMobile, isTablet, height }: EmailSignupSectionPr
                 </div>
                 <span className={`font-medium ${isMobile ? 'text-xs' : 'text-sm'}`}>
                   <span className="text-transparent bg-clip-text bg-linear-to-r from-revz-red to-red-400 font-bold">
-                    {subscriberCount.toLocaleString()}
+                    <NumberTicker value={subscriberCount} />
                   </span>
                   <span className="text-white/70">
                     {subscriberCount === 1 ? ' fan' : ' fans'} on the grid
