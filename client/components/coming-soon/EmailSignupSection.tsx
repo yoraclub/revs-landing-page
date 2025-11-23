@@ -119,7 +119,7 @@ const EmailSignupSection = ({ isMobile, isTablet, height }: EmailSignupSectionPr
             <GlassSurface
               width="100%"
               height="auto"
-              borderRadius={isMobile ? 24 : 32}
+              borderRadius={32}
               className="w-full relative z-10"
             >
         <motion.div
