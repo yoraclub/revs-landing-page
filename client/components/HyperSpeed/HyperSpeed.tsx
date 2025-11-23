@@ -1,4 +1,4 @@
-import { useEffect, useRef, FC } from 'react';
+import { useEffect, useRef, useMemo, FC } from 'react';
 import * as THREE from 'three';
 import { BloomEffect, EffectComposer, EffectPass, RenderPass, SMAAEffect, SMAAPreset } from 'postprocessing';
 
@@ -1228,10 +1228,10 @@ class App {
 }
 
 const Hyperspeed: FC<HyperspeedProps> = ({ effectOptions = {}, paused = false, isMobile = false, isTablet = false }) => {
-  const mergedOptions: HyperspeedOptions = {
+  const mergedOptions = useMemo<HyperspeedOptions>(() => ({
     ...defaultOptions,
     ...effectOptions
-  };
+  }), [effectOptions]);
   const hyperspeed = useRef<HTMLDivElement>(null);
   const appRef = useRef<App | null>(null);
 
