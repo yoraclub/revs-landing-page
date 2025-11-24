@@ -73,7 +73,7 @@ const ComingSoon = () => {
 
     // Add snap points using actual DOM positions
     if (section1Ref.current) snap.add(section1Ref.current.offsetTop);
-    if (section2Ref.current) snap.add(section2Ref.current.offsetTop);
+    // if (section2Ref.current) snap.add(section2Ref.current.offsetTop);
     if (section3Ref.current) snap.add(section3Ref.current.offsetTop);
 
     function raf(time: number) {

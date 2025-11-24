@@ -9,7 +9,7 @@ const TeaseSection = ({ isMobile, height }: TeaseSectionProps) => {
   return (
     <section
       className="w-full flex items-center justify-center px-4 overflow-hidden relative bg-background"
-      style={{ height }}
+      style={{ height: height * 2 }}
     >
       <div className="relative w-full h-full">
         <VideoText
