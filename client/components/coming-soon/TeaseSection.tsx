@@ -90,7 +90,6 @@ const TeaseSection = ({ isMobile, height, scrollContainer }: TeaseSectionProps) 
           <video
             className="w-full h-full object-cover"
             autoPlay
-            muted
             loop
             playsInline
           >
