@@ -1,17 +1,47 @@
 import { useRef, useState, useEffect, RefObject } from "react";
+import Lenis from "lenis";
 
 interface TeaseSectionProps {
   isMobile: boolean;
   height: number;
   scrollContainer: RefObject<HTMLDivElement | null>;
+  lenisRef: RefObject<Lenis | null>;
 }
 
-const TeaseSection = ({ isMobile, height, scrollContainer }: TeaseSectionProps) => {
+const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSectionProps) => {
   const sectionRef = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [scale, setScale] = useState(1);
   const [translateY, setTranslateY] = useState(0);
   const [progress, setProgress] = useState(0);
   const [svgMask, setSvgMask] = useState("");
+  const hasPausedRef = useRef(false);
+
+  // Pause scroll when video is fully visible
+  useEffect(() => {
+    if (progress >= 1 && !hasPausedRef.current && lenisRef.current && sectionRef.current) {
+      hasPausedRef.current = true;
+
+      // Snap to exact end of section
+      const sectionTop = sectionRef.current.offsetTop;
+      const sectionHeight = sectionRef.current.offsetHeight;
+      const exactEndPosition = sectionTop + sectionHeight - height;
+
+      lenisRef.current.scrollTo(exactEndPosition, { immediate: true });
+      lenisRef.current.stop();
+
+      // Ensure video keeps playing
+      if (videoRef.current) {
+        videoRef.current.play();
+      }
+
+      setTimeout(() => {
+        if (lenisRef.current) {
+          lenisRef.current.start();
+        }
+      }, 3000);
+    }
+  }, [progress, lenisRef, height]);
 
   // Generate SVG mask
   useEffect(() => {
@@ -100,9 +130,10 @@ const TeaseSection = ({ isMobile, height, scrollContainer }: TeaseSectionProps) 
               }}
             >
               <video
+                ref={videoRef}
                 className="h-full w-full object-cover"
                 autoPlay
-                muted={progress < 0.9}
+                muted
                 loop
                 playsInline
               >

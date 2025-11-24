@@ -104,7 +104,7 @@ const ComingSoon = () => {
           <LogoSection arrowClicked={arrowClicked} onScrollDown={handleScrollDown} isMobile={isMobile} isTablet={isTablet} height={viewportHeight} />
         </div>
         <div ref={section2Ref}>
-          <TeaseSection isMobile={isMobile} height={viewportHeight} scrollContainer={wrapperRef} />
+          <TeaseSection isMobile={isMobile} height={viewportHeight} scrollContainer={wrapperRef} lenisRef={lenisRef} />
         </div>
         <div ref={section3Ref}>
           <EmailSignupSection isMobile={isMobile} isTablet={isTablet} height={viewportHeight} />
