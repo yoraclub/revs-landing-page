@@ -11,37 +11,11 @@ interface TeaseSectionProps {
 const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSectionProps) => {
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [scale, setScale] = useState(1);
-  const [translateY, setTranslateY] = useState(0);
-  const [progress, setProgress] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const scaleRef = useRef<HTMLDivElement>(null);
+  const maskRef = useRef<HTMLDivElement>(null);
   const [svgMask, setSvgMask] = useState("");
   const hasPausedRef = useRef(false);
-
-  // Pause scroll when video is fully visible
-  useEffect(() => {
-    if (progress >= 1 && !hasPausedRef.current && lenisRef.current && sectionRef.current) {
-      hasPausedRef.current = true;
-
-      // Snap to exact end of section
-      const sectionTop = sectionRef.current.offsetTop;
-      const sectionHeight = sectionRef.current.offsetHeight;
-      const exactEndPosition = sectionTop + sectionHeight - height;
-
-      lenisRef.current.scrollTo(exactEndPosition, { immediate: true });
-      lenisRef.current.stop();
-
-      // Ensure video keeps playing
-      if (videoRef.current) {
-        videoRef.current.play();
-      }
-
-      setTimeout(() => {
-        if (lenisRef.current) {
-          lenisRef.current.start();
-        }
-      }, 3000);
-    }
-  }, [progress, lenisRef, height]);
 
   // Generate SVG mask
   useEffect(() => {
@@ -61,7 +35,7 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
     if (!container) return;
 
     const handleScroll = () => {
-      if (!sectionRef.current) return;
+      if (!sectionRef.current || !containerRef.current || !scaleRef.current || !maskRef.current) return;
 
       const sectionTop = sectionRef.current.offsetTop;
       const sectionHeight = sectionRef.current.offsetHeight;
@@ -71,28 +45,55 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
       const scrolledPast = scrollTop - sectionTop;
 
       // Progress through section (0 to 1)
-      const newProgress = Math.max(0, Math.min(1, scrolledPast / (sectionHeight - height)));
-      setProgress(newProgress);
+      const progress = Math.max(0, Math.min(1, scrolledPast / (sectionHeight - height)));
 
       // Scale from 1 to 3 as user scrolls through section
-      const newScale = 1 + newProgress * 2;
-      setScale(newScale);
+      const scale = 1 + progress * 2;
 
       // Keep the text centered in viewport by translating with scroll
-      const yOffset = Math.max(0, Math.min(scrolledPast, sectionHeight - height));
-      setTranslateY(yOffset);
+      const translateY = Math.max(0, Math.min(scrolledPast, sectionHeight - height));
+
+      // Calculate mask size based on progress
+      const maskScale = 1 + progress * 20;
+
+      // Apply transforms directly to DOM (no state updates)
+      containerRef.current.style.transform = `translateY(${translateY}px)`;
+      scaleRef.current.style.transform = `scale(${scale})`;
+
+      const maskSize = `${100 * maskScale}% ${100 * maskScale}%`;
+      maskRef.current.style.maskSize = maskSize;
+      maskRef.current.style.webkitMaskSize = maskSize;
+
+      // Pause scroll when video is fully visible
+      if (progress >= 1 && !hasPausedRef.current && lenisRef.current) {
+        hasPausedRef.current = true;
+
+        // Snap to exact end of section
+        const exactEndPosition = sectionTop + sectionHeight - height;
+
+        lenisRef.current.scrollTo(exactEndPosition, { immediate: true });
+        lenisRef.current.stop();
+
+        // Ensure video keeps playing
+        if (videoRef.current) {
+          videoRef.current.play();
+        }
+
+        setTimeout(() => {
+          if (lenisRef.current) {
+            lenisRef.current.start();
+          }
+        }, 3000);
+      }
     };
 
     container.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
 
     return () => container.removeEventListener("scroll", handleScroll);
-  }, [scrollContainer, height]);
+  }, [scrollContainer, height, lenisRef]);
 
   const dataUrlMask = `url("data:image/svg+xml,${encodeURIComponent(svgMask)}")`;
-
-  // Calculate mask size based on progress - grows from text size to full coverage
-  const maskScale = 1 + progress * 20;
 
   return (
     <section
@@ -101,15 +102,14 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
       style={{ height: height * 3 }}
     >
       <div
-        className="relative w-full flex items-center justify-center"
-        style={{
-          height: height,
-          transform: `translateY(${translateY}px)`,
-        }}
+        ref={containerRef}
+        className="relative w-full flex items-center justify-center will-change-transform"
+        style={{ height: height }}
       >
         <div
+          ref={scaleRef}
+          className="will-change-transform"
           style={{
-            transform: `scale(${scale})`,
             transformOrigin: "center center",
             width: "100%",
             height: "100%",
@@ -117,12 +117,13 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
         >
           <div className="relative size-full">
             <div
+              ref={maskRef}
               className="absolute inset-0 flex items-center justify-center"
               style={{
-                maskImage: progress >= 1 ? "none" : dataUrlMask,
-                WebkitMaskImage: progress >= 1 ? "none" : dataUrlMask,
-                maskSize: `${100 * maskScale}% ${100 * maskScale}%`,
-                WebkitMaskSize: `${100 * maskScale}% ${100 * maskScale}%`,
+                maskImage: dataUrlMask,
+                WebkitMaskImage: dataUrlMask,
+                maskSize: "100% 100%",
+                WebkitMaskSize: "100% 100%",
                 maskRepeat: "no-repeat",
                 WebkitMaskRepeat: "no-repeat",
                 maskPosition: "center",
