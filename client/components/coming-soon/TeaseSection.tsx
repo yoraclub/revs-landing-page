@@ -8,45 +8,21 @@ interface TeaseSectionProps {
   lenisRef: RefObject<Lenis | null>;
 }
 
-// Animation constants
-const SCALE_MULTIPLIER = 5;
-const MORPH_DELAY_MS = 500;
-const PAUSE_DURATION_MS = 3000;
-const UNMORPH_THRESHOLD = 0.95;
-const TRANSITION_EASING = "all 0.6s cubic-bezier(0.4, 0, 0.2, 1)";
-
 const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSectionProps) => {
-  // Refs
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const scaleRef = useRef<HTMLDivElement>(null);
-  const hasPausedRef = useRef(false);
-  const isMorphingRef = useRef(false);
-
-  // State
+  const maskRef = useRef<HTMLDivElement>(null);
   const [svgMask, setSvgMask] = useState("");
-  const [isMorphed, setIsMorphed] = useState(false);
+  const hasPausedRef = useRef(false);
 
-  // Generate SVG text mask
+  // Generate SVG mask
   useEffect(() => {
     const updateSvgMask = () => {
       const fontSize = "12vw";
-      const svg = `
-        <svg xmlns='http://www.w3.org/2000/svg' width='100%' height='100%'>
-          <text
-            x='50%'
-            y='50%'
-            font-size='${fontSize}'
-            font-weight='bold'
-            text-anchor='middle'
-            dominant-baseline='middle'
-            font-family='Orbitron, sans-serif'
-          >Soon.</text>
-        </svg>
-      `.replace(/\s+/g, ' ').trim();
-
-      setSvgMask(svg);
+      const newSvgMask = `<svg xmlns='http://www.w3.org/2000/svg' width='100%' height='100%'><text x='50%' y='50%' font-size='${fontSize}' font-weight='bold' text-anchor='middle' dominant-baseline='middle' font-family='Orbitron, sans-serif'>Soon.</text></svg>`;
+      setSvgMask(newSvgMask);
     };
 
     updateSvgMask();
@@ -54,128 +30,70 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
     return () => window.removeEventListener("resize", updateSvgMask);
   }, []);
 
-  // Main scroll handler
   useEffect(() => {
-    const lenis = lenisRef.current;
     const container = scrollContainer.current;
-    if (!lenis || !container) return;
+    if (!container) return;
 
     const handleScroll = () => {
-      const section = sectionRef.current;
-      const containerEl = containerRef.current;
-      const scaleEl = scaleRef.current;
+      if (!sectionRef.current || !containerRef.current || !scaleRef.current || !maskRef.current) return;
 
-      if (!section || !containerEl || !scaleEl) return;
+      const sectionTop = sectionRef.current.offsetTop;
+      const sectionHeight = sectionRef.current.offsetHeight;
+      const scrollTop = container.scrollTop;
 
-      // Calculate scroll progress through section
-      const sectionTop = section.offsetTop;
-      const sectionHeight = section.offsetHeight;
-      const scrollTop = lenis.scroll;
+      // How far we've scrolled past the section top
       const scrolledPast = scrollTop - sectionTop;
+
+      // Progress through section (0 to 1)
       const progress = Math.max(0, Math.min(1, scrolledPast / (sectionHeight - height)));
 
-      // Calculate transform values
+      // Scale from 1 to 3 as user scrolls through section
+      const scale = 1 + progress * 2;
+
+      // Keep the text centered in viewport by translating with scroll
       const translateY = Math.max(0, Math.min(scrolledPast, sectionHeight - height));
-      const scale = 1 + progress * SCALE_MULTIPLIER;
 
-      // Apply transforms (only when not morphing and not paused)
-      if (!isMorphingRef.current && !hasPausedRef.current) {
-        containerEl.style.transform = `translateY(${translateY}px)`;
-        scaleEl.style.transform = `scale(${scale})`;
-      }
+      // Calculate mask size based on progress
+      const maskScale = 1 + progress * 20;
 
-      // Handle end of scroll - pause and morph to mini player
+      // Apply transforms directly to DOM (no state updates)
+      containerRef.current.style.transform = `translateY(${translateY}px)`;
+      scaleRef.current.style.transform = `scale(${scale})`;
+
+      const maskSize = `${100 * maskScale}% ${100 * maskScale}%`;
+      maskRef.current.style.maskSize = maskSize;
+      maskRef.current.style.webkitMaskSize = maskSize;
+
+      // Pause scroll when video is fully visible
       if (progress >= 1 && !hasPausedRef.current && lenisRef.current) {
         hasPausedRef.current = true;
 
-        // Snap to exact section end
+        // Snap to exact end of section
         const exactEndPosition = sectionTop + sectionHeight - height;
+
         lenisRef.current.scrollTo(exactEndPosition, { immediate: true });
         lenisRef.current.stop();
 
-        // Keep video playing
-        videoRef.current?.play();
-
-        // Morph to mini player with crossfade
-        setTimeout(() => {
-          isMorphingRef.current = true;
-
-          // Fade out
-          scaleEl.style.transition = "opacity 0.3s ease-out";
-          scaleEl.style.opacity = "0";
-
-          setTimeout(() => {
-            // Apply morph changes while hidden
-            scaleEl.style.transform = "scale(1)";
-            setIsMorphed(true);
-
-            // Fade back in
-            requestAnimationFrame(() => {
-              scaleEl.style.transition = "opacity 0.3s ease-in";
-              scaleEl.style.opacity = "1";
-
-              // Mark morphing complete after fade in
-              setTimeout(() => {
-                isMorphingRef.current = false;
-              }, 300);
-            });
-          }, 300);
-        }, MORPH_DELAY_MS);
-
-        // Resume scrolling
-        setTimeout(() => lenisRef.current?.start(), PAUSE_DURATION_MS);
-      }
-
-      // Handle scroll back up - reset to text animation
-      if (progress < UNMORPH_THRESHOLD && hasPausedRef.current) {
-        hasPausedRef.current = false;
-        isMorphingRef.current = true;
-
-        // Fade out, then apply changes, then fade in
-        scaleEl.style.transition = "opacity 0.3s ease-out";
-        scaleEl.style.opacity = "0";
+        // Ensure video keeps playing
+        if (videoRef.current) {
+          videoRef.current.play();
+        }
 
         setTimeout(() => {
-          // Apply current progress values while hidden
-          scaleEl.style.transform = `scale(${scale})`;
-          setIsMorphed(false);
-
-          // Fade back in
-          requestAnimationFrame(() => {
-            scaleEl.style.transition = "opacity 0.3s ease-in";
-            scaleEl.style.opacity = "1";
-
-            // Remove transitions and allow scroll updates after fade completes
-            setTimeout(() => {
-              scaleEl.style.transition = "none";
-              isMorphingRef.current = false;
-            }, 300);
-          });
-        }, 300);
+          if (lenisRef.current) {
+            lenisRef.current.start();
+          }
+        }, 3000);
       }
     };
 
-    // Use RAF loop to continuously update based on Lenis scroll position
-    let rafId: number;
-    const update = () => {
-      handleScroll();
-      rafId = requestAnimationFrame(update);
-    };
-    rafId = requestAnimationFrame(update);
+    container.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
 
-    return () => {
-      cancelAnimationFrame(rafId);
-    };
+    return () => container.removeEventListener("scroll", handleScroll);
   }, [scrollContainer, height, lenisRef]);
 
-  // Computed styles
   const dataUrlMask = `url("data:image/svg+xml,${encodeURIComponent(svgMask)}")`;
-
-  // Video player size - fits within viewport while maintaining 16:9 aspect ratio
-  const miniPlayerSize = {
-    width: "min(90vw, calc(80vh * 16 / 9))",
-    height: "min(80vh, calc(90vw * 9 / 16))",
-  };
 
   return (
     <section
@@ -183,13 +101,11 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
       className="w-full px-4 overflow-hidden relative bg-background"
       style={{ height: height * 3 }}
     >
-      {/* Scroll container - handles vertical positioning */}
       <div
         ref={containerRef}
         className="relative w-full flex items-center justify-center will-change-transform"
-        style={{ height }}
+        style={{ height: height }}
       >
-        {/* Scale container - handles zoom animation */}
         <div
           ref={scaleRef}
           className="will-change-transform"
@@ -199,32 +115,19 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
             height: "100%",
           }}
         >
-          {/* Content wrapper */}
-          <div
-            className="relative size-full flex items-center justify-center"
-            style={{ transition: isMorphed ? TRANSITION_EASING : "none" }}
-          >
-            {/* Video with text mask */}
+          <div className="relative size-full">
             <div
-              className="flex items-center justify-center"
+              ref={maskRef}
+              className="absolute inset-0 flex items-center justify-center"
               style={{
-                // Mask properties
-                maskImage: isMorphed ? "none" : dataUrlMask,
-                WebkitMaskImage: isMorphed ? "none" : dataUrlMask,
-                maskSize: "contain",
-                WebkitMaskSize: "contain",
+                maskImage: dataUrlMask,
+                WebkitMaskImage: dataUrlMask,
+                maskSize: "100% 100%",
+                WebkitMaskSize: "100% 100%",
                 maskRepeat: "no-repeat",
                 WebkitMaskRepeat: "no-repeat",
                 maskPosition: "center",
                 WebkitMaskPosition: "center",
-                // Size properties
-                width: isMorphed ? miniPlayerSize.width : "100%",
-                height: isMorphed ? miniPlayerSize.height : "100%",
-                // Visual properties
-                borderRadius: isMorphed ? "16px" : "0px",
-                overflow: "hidden",
-                boxShadow: isMorphed ? "0 25px 50px -12px rgba(0, 0, 0, 0.5)" : "none",
-                transition: isMorphed ? TRANSITION_EASING : "none",
               }}
             >
               <video
