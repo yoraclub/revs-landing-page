@@ -11,11 +11,49 @@ interface TeaseSectionProps {
 const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSectionProps) => {
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const unmaskedVideoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const scaleRef = useRef<HTMLDivElement>(null);
   const maskRef = useRef<HTMLDivElement>(null);
+  const unmaskedRef = useRef<HTMLDivElement>(null);
+  const videoWrapperRef = useRef<HTMLDivElement>(null);
   const [svgMask, setSvgMask] = useState("");
+  const [videoAspectRatio, setVideoAspectRatio] = useState(16 / 9);
   const hasPausedRef = useRef(false);
+
+  // Get video aspect ratio when loaded and sync video playback
+  useEffect(() => {
+    const video = videoRef.current;
+    const unmaskedVideo = unmaskedVideoRef.current;
+    if (!video) return;
+
+    const handleLoadedMetadata = () => {
+      if (video.videoWidth && video.videoHeight) {
+        setVideoAspectRatio(video.videoWidth / video.videoHeight);
+      }
+    };
+
+    video.addEventListener("loadedmetadata", handleLoadedMetadata);
+
+    // If video already loaded
+    if (video.readyState >= 1) {
+      handleLoadedMetadata();
+    }
+
+    // Ensure both videos play
+    const ensurePlayback = async () => {
+      try {
+        if (video) await video.play();
+        if (unmaskedVideo) await unmaskedVideo.play();
+      } catch (err) {
+        console.error("Video playback failed:", err);
+      }
+    };
+
+    ensurePlayback();
+
+    return () => video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+  }, []);
 
   // Generate SVG mask
   useEffect(() => {
@@ -35,7 +73,7 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
     if (!container) return;
 
     const handleScroll = () => {
-      if (!sectionRef.current || !containerRef.current || !scaleRef.current || !maskRef.current) return;
+      if (!sectionRef.current || !containerRef.current || !scaleRef.current || !maskRef.current || !unmaskedRef.current || !videoWrapperRef.current) return;
 
       const sectionTop = sectionRef.current.offsetTop;
       const sectionHeight = sectionRef.current.offsetHeight;
@@ -47,7 +85,7 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
       // Progress through section (0 to 1)
       const progress = Math.max(0, Math.min(1, scrolledPast / (sectionHeight - height)));
 
-      // Scale from 1 to 3 as user scrolls through section
+      // Scale from 1 to 3 as user scrolls through section (but slow down at the end)
       const scale = 1 + progress * 2;
 
       // Keep the text centered in viewport by translating with scroll
@@ -56,6 +94,10 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
       // Calculate mask size based on progress
       const maskScale = 1 + progress * 20;
 
+      // Transition phase: 0.7-1.0 (last 30% of scroll)
+      const transitionStart = 0.7;
+      const transitionProgress = Math.max(0, Math.min(1, (progress - transitionStart) / (1 - transitionStart)));
+
       // Apply transforms directly to DOM (no state updates)
       containerRef.current.style.transform = `translateY(${translateY}px)`;
       scaleRef.current.style.transform = `scale(${scale})`;
@@ -63,6 +105,50 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
       const maskSize = `${100 * maskScale}% ${100 * maskScale}%`;
       maskRef.current.style.maskSize = maskSize;
       maskRef.current.style.webkitMaskSize = maskSize;
+
+      // Cross-fade between masked and unmasked video during transition
+      maskRef.current.style.opacity = `${1 - transitionProgress}`;
+      unmaskedRef.current.style.opacity = `${transitionProgress}`;
+
+      // Sync video playback time
+      if (videoRef.current && unmaskedVideoRef.current && transitionProgress > 0) {
+        if (Math.abs(videoRef.current.currentTime - unmaskedVideoRef.current.currentTime) > 0.1) {
+          unmaskedVideoRef.current.currentTime = videoRef.current.currentTime;
+        }
+      }
+
+      // Transition video wrapper to natural aspect ratio
+      if (transitionProgress > 0) {
+        // Calculate video dimensions at natural aspect ratio
+        const containerWidth = containerRef.current.offsetWidth;
+        const containerHeight = height;
+
+        // Determine which dimension to constrain
+        const containerAspect = containerWidth / containerHeight;
+        let videoWidth, videoHeight;
+
+        if (videoAspectRatio > containerAspect) {
+          // Video is wider - constrain by width
+          videoWidth = containerWidth * 0.9; // 90% of container width
+          videoHeight = videoWidth / videoAspectRatio;
+        } else {
+          // Video is taller - constrain by height
+          videoHeight = containerHeight * 0.8; // 80% of container height
+          videoWidth = videoHeight * videoAspectRatio;
+        }
+
+        // Interpolate from full size to natural aspect ratio size
+        const currentWidth = 100 - (transitionProgress * (100 - (videoWidth / containerWidth * 100)));
+        const currentHeight = 100 - (transitionProgress * (100 - (videoHeight / containerHeight * 100)));
+
+        videoWrapperRef.current.style.width = `${currentWidth}%`;
+        videoWrapperRef.current.style.height = `${currentHeight}%`;
+        videoWrapperRef.current.style.transition = 'width 0.1s ease-out, height 0.1s ease-out';
+      } else {
+        videoWrapperRef.current.style.width = '100%';
+        videoWrapperRef.current.style.height = '100%';
+        videoWrapperRef.current.style.transition = 'none';
+      }
 
       // Pause scroll when video is fully visible
       if (progress >= 1 && !hasPausedRef.current && lenisRef.current) {
@@ -74,9 +160,12 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
         lenisRef.current.scrollTo(exactEndPosition, { immediate: true });
         lenisRef.current.stop();
 
-        // Ensure video keeps playing
+        // Ensure both videos keep playing
         if (videoRef.current) {
           videoRef.current.play();
+        }
+        if (unmaskedVideoRef.current) {
+          unmaskedVideoRef.current.play();
         }
 
         setTimeout(() => {
@@ -91,7 +180,7 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
     handleScroll();
 
     return () => container.removeEventListener("scroll", handleScroll);
-  }, [scrollContainer, height, lenisRef]);
+  }, [scrollContainer, height, lenisRef, videoAspectRatio]);
 
   const dataUrlMask = `url("data:image/svg+xml,${encodeURIComponent(svgMask)}")`;
 
@@ -115,31 +204,62 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
             height: "100%",
           }}
         >
-          <div className="relative size-full">
+          <div className="relative size-full flex items-center justify-center">
             <div
-              ref={maskRef}
-              className="absolute inset-0 flex items-center justify-center"
+              ref={videoWrapperRef}
+              className="relative will-change-transform"
               style={{
-                maskImage: dataUrlMask,
-                WebkitMaskImage: dataUrlMask,
-                maskSize: "100% 100%",
-                WebkitMaskSize: "100% 100%",
-                maskRepeat: "no-repeat",
-                WebkitMaskRepeat: "no-repeat",
-                maskPosition: "center",
-                WebkitMaskPosition: "center",
+                width: "100%",
+                height: "100%",
               }}
             >
-              <video
-                ref={videoRef}
-                className="h-full w-full object-cover"
-                autoPlay
-                muted
-                loop
-                playsInline
+              {/* Masked video layer - fades out during transition */}
+              <div
+                ref={maskRef}
+                className="absolute inset-0 flex items-center justify-center"
+                style={{
+                  maskImage: dataUrlMask,
+                  WebkitMaskImage: dataUrlMask,
+                  maskSize: "100% 100%",
+                  WebkitMaskSize: "100% 100%",
+                  maskRepeat: "no-repeat",
+                  WebkitMaskRepeat: "no-repeat",
+                  maskPosition: "center",
+                  WebkitMaskPosition: "center",
+                  opacity: 1,
+                }}
               >
-                <source src="/Teaser-Video.mp4" type="video/mp4" />
-              </video>
+                <video
+                  ref={videoRef}
+                  className="h-full w-full object-cover"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                >
+                  <source src="/Teaser-Video.mp4" type="video/mp4" />
+                </video>
+              </div>
+
+              {/* Unmasked video layer - fades in during transition */}
+              <div
+                ref={unmaskedRef}
+                className="absolute inset-0 flex items-center justify-center"
+                style={{
+                  opacity: 0,
+                }}
+              >
+                <video
+                  ref={unmaskedVideoRef}
+                  className="h-full w-full object-contain"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                >
+                  <source src="/Teaser-Video.mp4" type="video/mp4" />
+                </video>
+              </div>
             </div>
           </div>
         </div>
