@@ -135,8 +135,10 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
       // Keep the text centered in viewport by translating with scroll
       const translateY = Math.max(0, Math.min(scrolledPast, sectionHeight - height));
 
-      // Calculate mask size based on progress (scale up faster for dramatic effect)
-      const maskScale = 1 + progress * 20;
+      // Calculate mask size based on progress (slower expansion for better control)
+      // Only expand during the scale and transition phases (0 to transitionEnd)
+      const maskProgress = Math.min(progress / transitionEnd, 1);
+      const maskScale = 1 + maskProgress * 6;
 
       // Transition phase: fade out mask during middle section
       const transitionProgress = Math.max(0, Math.min(1, (progress - transitionStart) / (transitionEnd - transitionStart)));
