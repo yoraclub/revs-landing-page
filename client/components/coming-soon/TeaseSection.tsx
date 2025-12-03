@@ -59,7 +59,9 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
   // Generate SVG mask with high resolution
   useEffect(() => {
     const updateSvgMask = () => {
-      const fontSize = "12vw";
+      // Much larger text on mobile portrait for readability
+      const isPortrait = window.innerHeight > window.innerWidth;
+      const fontSize = isMobile && isPortrait ? "30vw" : "12vw";
       const newSvgMask = `<svg xmlns='http://www.w3.org/2000/svg' width='100%' height='100%' viewBox='0 0 1920 1080' preserveAspectRatio='xMidYMid slice'><text x='50%' y='50%' font-size='${fontSize}' font-weight='bold' text-anchor='middle' dominant-baseline='middle' font-family='Orbitron, sans-serif'>Soon.</text></svg>`;
       setSvgMask(newSvgMask);
     };
@@ -67,7 +69,7 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
     updateSvgMask();
     window.addEventListener("resize", updateSvgMask);
     return () => window.removeEventListener("resize", updateSvgMask);
-  }, []);
+  }, [isMobile]);
 
   // Sync mute state to video
   useEffect(() => {
@@ -114,11 +116,26 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
       currentProgressRef.current = progress;
 
       // Calculate the scale needed to fill the screen
-      // Video wrapper is constrained to 90% width and 80% height
-      // We need to scale until it fills 100% of the viewport
-      const scaleToFillWidth = 1 / 0.9;  // ~1.11
-      const scaleToFillHeight = 1 / 0.8; // 1.25
-      const maxScale = Math.max(scaleToFillWidth, scaleToFillHeight); // 1.25
+      // Different behavior for mobile portrait vs desktop/landscape
+      const isPortrait = height > window.innerWidth;
+      const isMobilePortrait = isMobile && isPortrait;
+
+      let maxScale;
+      if (isMobilePortrait) {
+        // On mobile portrait, video needs more scaling to fill screen
+        // Video wrapper constrained to 90% width and 60% height
+        // Need to scale up to fill portrait screen height
+        const scaleToFillWidth = 1 / 0.9;   // ~1.11
+        const scaleToFillHeight = 1 / 0.6;   // ~1.67
+        // We want to fill the height primarily on portrait
+        maxScale = scaleToFillHeight;
+      } else {
+        // Desktop/landscape: original calculation
+        // Video wrapper is constrained to 90% width and 80% height
+        const scaleToFillWidth = 1 / 0.9;  // ~1.11
+        const scaleToFillHeight = 1 / 0.8; // 1.25
+        maxScale = Math.max(scaleToFillWidth, scaleToFillHeight); // 1.25
+      }
 
       // Define animation phases
       // Phase 1: Scale up to fill screen (0 to 0.4 progress)
@@ -138,7 +155,9 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
       // Calculate mask size based on progress (slower expansion for better control)
       // Only expand during the scale and transition phases (0 to transitionEnd)
       const maskProgress = Math.min(progress / transitionEnd, 1);
-      const maskScale = 1 + maskProgress * 6;
+      // Mobile portrait needs less mask expansion due to larger initial text size
+      const maskMultiplier = isMobilePortrait ? 4 : 6;
+      const maskScale = 1 + maskProgress * maskMultiplier;
 
       // Transition phase: fade out mask during middle section
       const transitionProgress = Math.max(0, Math.min(1, (progress - transitionStart) / (transitionEnd - transitionStart)));
@@ -252,8 +271,8 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
               ref={videoWrapperRef}
               className="relative will-change-transform flex items-center justify-center"
               style={{
-                maxWidth: "90%",
-                maxHeight: "80%",
+                maxWidth: isMobile && height > window.innerWidth ? "90%" : "90%",
+                maxHeight: isMobile && height > window.innerWidth ? "60%" : "80%",
                 width: "100%",
                 height: "100%",
                 aspectRatio: `${videoAspectRatio}`,
