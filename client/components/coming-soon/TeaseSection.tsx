@@ -19,6 +19,8 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
   const videoWrapperRef = useRef<HTMLDivElement>(null);
   const [svgMask, setSvgMask] = useState("");
   const [videoAspectRatio, setVideoAspectRatio] = useState(16 / 9);
+  const [isMuted, setIsMuted] = useState(true);
+  const [showButton, setShowButton] = useState(false);
   const hasPausedRef = useRef(false);
 
   // Get video aspect ratio when loaded and sync video playback
@@ -40,11 +42,19 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
       handleLoadedMetadata();
     }
 
-    // Ensure both videos play
+    // Ensure both videos play - start muted for autoplay compatibility
     const ensurePlayback = async () => {
       try {
-        if (video) await video.play();
-        if (unmaskedVideo) await unmaskedVideo.play();
+        if (video) {
+          video.muted = true;
+          video.volume = 1.0;
+          await video.play();
+        }
+        if (unmaskedVideo) {
+          unmaskedVideo.muted = true;
+          unmaskedVideo.volume = 1.0;
+          await unmaskedVideo.play();
+        }
       } catch (err) {
         console.error("Video playback failed:", err);
       }
@@ -68,6 +78,20 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
     return () => window.removeEventListener("resize", updateSvgMask);
   }, []);
 
+  // Sync mute state across both videos
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = isMuted;
+    }
+    if (unmaskedVideoRef.current) {
+      unmaskedVideoRef.current.muted = isMuted;
+    }
+  }, [isMuted]);
+
+  const toggleMute = () => {
+    setIsMuted(!isMuted);
+  };
+
   useEffect(() => {
     const container = scrollContainer.current;
     if (!container) return;
@@ -78,6 +102,12 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
       const sectionTop = sectionRef.current.offsetTop;
       const sectionHeight = sectionRef.current.offsetHeight;
       const scrollTop = container.scrollTop;
+
+      // Check if section is in viewport - show button only when in TeaseSection
+      const sectionBottom = sectionTop + sectionHeight;
+      const viewportBottom = scrollTop + height;
+      const isInView = scrollTop < sectionBottom && viewportBottom > sectionTop;
+      setShowButton(isInView);
 
       // How far we've scrolled past the section top
       const scrolledPast = scrollTop - sectionTop;
@@ -151,6 +181,48 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
       className="w-full px-4 overflow-hidden relative bg-background"
       style={{ height: height * 3 }}
     >
+      {/* Mute/Unmute Button - fixed position, only visible in TeaseSection */}
+      {showButton && (
+        <button
+          onClick={toggleMute}
+          className="fixed top-4 right-4 z-50 bg-black/50 hover:bg-black/70 backdrop-blur-sm p-3 rounded-full transition-all duration-200 hover:scale-110 active:scale-95"
+          aria-label={isMuted ? "Unmute video" : "Mute video"}
+          title={isMuted ? "Click to unmute" : "Click to mute"}
+        >
+          {isMuted ? (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+              stroke="currentColor"
+              className="w-6 h-6 text-white"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M17.25 9.75L19.5 12m0 0l2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6l4.72-4.72a.75.75 0 011.28.531V19.94a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.506-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.395C2.806 8.757 3.63 8.25 4.51 8.25H6.75z"
+              />
+            </svg>
+          ) : (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+              stroke="currentColor"
+              className="w-6 h-6 text-white"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z"
+              />
+            </svg>
+          )}
+        </button>
+      )}
+
       <div
         ref={containerRef}
         className="relative w-full flex items-center justify-center will-change-transform"
@@ -194,9 +266,9 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
                   ref={videoRef}
                   className="h-full w-full object-cover"
                   autoPlay
-                  muted
                   loop
                   playsInline
+                  muted={isMuted}
                 >
                   <source src="/Teaser-Video.mp4" type="video/mp4" />
                 </video>
@@ -223,9 +295,9 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
                     ref={unmaskedVideoRef}
                     className="w-full h-full"
                     autoPlay
-                    muted
                     loop
                     playsInline
+                    muted={isMuted}
                   >
                     <source src="/Teaser-Video.mp4" type="video/mp4" />
                   </video>
