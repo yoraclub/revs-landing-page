@@ -103,11 +103,18 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
       const sectionHeight = sectionRef.current.offsetHeight;
       const scrollTop = container.scrollTop;
 
-      // Check if section is in viewport - show button only when in TeaseSection
+      // Check if section occupies 70% of the viewport
       const sectionBottom = sectionTop + sectionHeight;
       const viewportBottom = scrollTop + height;
-      const isInView = scrollTop < sectionBottom && viewportBottom > sectionTop;
-      setShowButton(isInView);
+
+      // Calculate visible portion of section in viewport
+      const visibleStart = Math.max(sectionTop, scrollTop);
+      const visibleEnd = Math.min(sectionBottom, viewportBottom);
+      const visibleHeight = Math.max(0, visibleEnd - visibleStart);
+
+      // Show button when section occupies 70% or more of viewport
+      const viewportCoverage = visibleHeight / height;
+      setShowButton(viewportCoverage >= 0.7);
 
       // How far we've scrolled past the section top
       const scrolledPast = scrollTop - sectionTop;
@@ -181,8 +188,8 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
       className="w-full px-4 overflow-hidden relative bg-background"
       style={{ height: height * 3 }}
     >
-      {/* Mute/Unmute Button - fixed position, only visible in TeaseSection */}
-      {showButton && (
+      {/* Mute/Unmute Button - fixed position, visible in TeaseSection or when audio is playing */}
+      {(showButton || !isMuted) && (
         <button
           onClick={toggleMute}
           className="fixed top-4 right-4 z-50 bg-black/50 hover:bg-black/70 backdrop-blur-sm p-3 rounded-full transition-all duration-200 hover:scale-110 active:scale-95"
