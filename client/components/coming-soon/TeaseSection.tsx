@@ -107,48 +107,9 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
       maskRef.current.style.webkitMaskSize = maskSize;
 
       // Cross-fade between masked and unmasked video during transition
+      // Use simple opacity changes only - no layout-triggering operations
       maskRef.current.style.opacity = `${1 - transitionProgress}`;
       unmaskedRef.current.style.opacity = `${transitionProgress}`;
-
-      // Sync video playback time
-      if (videoRef.current && unmaskedVideoRef.current && transitionProgress > 0) {
-        if (Math.abs(videoRef.current.currentTime - unmaskedVideoRef.current.currentTime) > 0.1) {
-          unmaskedVideoRef.current.currentTime = videoRef.current.currentTime;
-        }
-      }
-
-      // Transition video wrapper to natural aspect ratio
-      if (transitionProgress > 0) {
-        // Calculate video dimensions at natural aspect ratio
-        const containerWidth = containerRef.current.offsetWidth;
-        const containerHeight = height;
-
-        // Determine which dimension to constrain
-        const containerAspect = containerWidth / containerHeight;
-        let videoWidth, videoHeight;
-
-        if (videoAspectRatio > containerAspect) {
-          // Video is wider - constrain by width
-          videoWidth = containerWidth * 0.9; // 90% of container width
-          videoHeight = videoWidth / videoAspectRatio;
-        } else {
-          // Video is taller - constrain by height
-          videoHeight = containerHeight * 0.8; // 80% of container height
-          videoWidth = videoHeight * videoAspectRatio;
-        }
-
-        // Interpolate from full size to natural aspect ratio size
-        const currentWidth = 100 - (transitionProgress * (100 - (videoWidth / containerWidth * 100)));
-        const currentHeight = 100 - (transitionProgress * (100 - (videoHeight / containerHeight * 100)));
-
-        videoWrapperRef.current.style.width = `${currentWidth}%`;
-        videoWrapperRef.current.style.height = `${currentHeight}%`;
-        videoWrapperRef.current.style.transition = 'width 0.1s ease-out, height 0.1s ease-out';
-      } else {
-        videoWrapperRef.current.style.width = '100%';
-        videoWrapperRef.current.style.height = '100%';
-        videoWrapperRef.current.style.transition = 'none';
-      }
 
       // Pause scroll when video is fully visible
       if (progress >= 1 && !hasPausedRef.current && lenisRef.current) {
@@ -249,16 +210,26 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
                   opacity: 0,
                 }}
               >
-                <video
-                  ref={unmaskedVideoRef}
-                  className="h-full w-full object-contain"
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
+                <div
+                  style={{
+                    maxWidth: '90%',
+                    maxHeight: '80%',
+                    aspectRatio: `${videoAspectRatio}`,
+                    width: '100%',
+                    height: '100%',
+                  }}
                 >
-                  <source src="/Teaser-Video.mp4" type="video/mp4" />
-                </video>
+                  <video
+                    ref={unmaskedVideoRef}
+                    className="w-full h-full"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                  >
+                    <source src="/Teaser-Video.mp4" type="video/mp4" />
+                  </video>
+                </div>
               </div>
             </div>
           </div>
