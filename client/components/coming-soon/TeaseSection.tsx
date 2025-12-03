@@ -65,11 +65,11 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
     return () => video.removeEventListener("loadedmetadata", handleLoadedMetadata);
   }, []);
 
-  // Generate SVG mask
+  // Generate SVG mask with high resolution
   useEffect(() => {
     const updateSvgMask = () => {
       const fontSize = "12vw";
-      const newSvgMask = `<svg xmlns='http://www.w3.org/2000/svg' width='100%' height='100%'><text x='50%' y='50%' font-size='${fontSize}' font-weight='bold' text-anchor='middle' dominant-baseline='middle' font-family='Orbitron, sans-serif'>Soon.</text></svg>`;
+      const newSvgMask = `<svg xmlns='http://www.w3.org/2000/svg' width='100%' height='100%' viewBox='0 0 1920 1080' preserveAspectRatio='xMidYMid slice'><text x='50%' y='50%' font-size='${fontSize}' font-weight='bold' text-anchor='middle' dominant-baseline='middle' font-family='Orbitron, sans-serif'>Soon.</text></svg>`;
       setSvgMask(newSvgMask);
     };
 
@@ -267,6 +267,8 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
                   maskPosition: "center",
                   WebkitMaskPosition: "center",
                   opacity: 1,
+                  transform: "translateZ(0)",
+                  backfaceVisibility: "hidden",
                 }}
               >
                 <video
@@ -276,6 +278,11 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
                   loop
                   playsInline
                   muted={isMuted}
+                  style={{
+                    transform: "translateZ(0)",
+                    backfaceVisibility: "hidden",
+                    WebkitBackfaceVisibility: "hidden",
+                  }}
                 >
                   <source src="/Teaser-Video.mp4" type="video/mp4" />
                 </video>
