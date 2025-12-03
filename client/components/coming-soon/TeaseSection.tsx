@@ -138,7 +138,7 @@ const TeaseSection = ({ isMobile, height, scrollContainer, lenisRef }: TeaseSect
                 loop
                 playsInline
               >
-                <source src="https://cdn.magicui.design/ocean-small.webm" />
+                <source src="/Teaser-Video.mp4" type="video/mp4" />
               </video>
             </div>
           </div>
